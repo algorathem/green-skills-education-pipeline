@@ -1,0 +1,16 @@
+id,item,gbp,usd_at_1_30,when,path,source,notes,url,as_of,confidence
+s01,LCL L3 ASHP course (Logic4training inc VAT),702,913,once,own_mcs,Logic4training,585 GBP + 20% VAT. HTG can cut 500 GBP.,https://www.logic4training.co.uk/courses/renewables/heat-pump-training-courses/air-source-heat-pump-training/,2026-09,high
+s02,Heat Training Grant (England),-500,-650,once,own_mcs,DESNZ,Discount on eligible short courses. Not paid toward MCS fees.,https://www.gov.uk/government/publications/heat-training-grant-for-heat-pumps,2026-06,high
+s03,RECC consumer code year 1,385,501,year1,own_mcs,RECC via Dwellow,100 joining + 285 membership for 1-6 employees. Redeveloped MCS may drop separate consumer-code requirement as transition completes.,https://www.dwellow.co.uk/guides/mcs-umbrella-scheme,2025-04,high
+s04,NICEIC application fee inc VAT,114,148,once,own_mcs,NICEIC,Non-refundable. Fees for 2026/27 certification year.,https://niceic.com/for-the-trades-1/professional-standards/schemes/mcs-scheme/,2026-09,high
+s05,NICEIC 12-month cert one technology inc VAT,846,1100,year1,own_mcs,NICEIC,One technology. Two technologies 1164 inc VAT.,https://niceic.com/for-the-trades-1/professional-standards/schemes/mcs-scheme/,2026-09,high
+s06,MCS licence fee inc VAT,66,86,year1,own_mcs,NICEIC / MCS,Transferred to MCS. Non-refundable.,https://niceic.com/for-the-trades-1/professional-standards/schemes/mcs-scheme/,2026-09,high
+s07,MCS official year-1 bundle (ex training),1090,1417,year1,own_mcs,MCS via Dwellow,Certification body + consumer code + MCS company fee. Excludes training and per-install certificates.,https://www.dwellow.co.uk/guides/mcs-umbrella-scheme,2025-04,high
+s08,MCS official ongoing annual (ex certificates),890,1157,annual,own_mcs,MCS via Dwellow,Keep certification live.,https://www.dwellow.co.uk/guides/mcs-umbrella-scheme,2025-04,high
+s09,MCS certificate per installation,30,39,per_job,own_mcs,MCS,Charged every certified install.,https://mcscertified.com/installers-manufacturers/becoming-certified/,2026-09,high
+s10,Public liability insurance minimum,0,0,annual,own_mcs,MCS guidance,At least 2 million GBP PL. Uplift not priced here (company-specific).,https://reonic.com/en-gb/blog/how-to-become-mcs-certified/,2026-07,medium
+s11,HPIN umbrella join fee,0,0,once,umbrella,HPIN,Free to join. EDF-owned network.,https://www.hpin.co.uk/,2025-09,high
+s12,HPIN design contribution per umbrella job,250,325,per_job,umbrella,HPIN,Installer asked to pay 250 GBP toward design (350 from some plans). Add to customer quote.,https://www.hpin.co.uk/home-test/,2025-12,high
+s13,HPIN audit and commissioning per job,250,325,per_job,umbrella,HPIN,They do MCS audit and commissioning.,https://www.hpin.co.uk/home-test/,2025-12,high
+s14,Start at Home funded kit,0,0,once,start_at_home,Nesta / Daikin,Heat pump kit funded (BUS-scale ~7500 GBP materials). Installer fits it in own home.,https://www.nesta.org.uk/project/start-at-home-for-newly-trained-heat-pump-installers,2026-09,high
+s15,Daikin Start at Home extra off first customer job,750,975,once,start_at_home,Daikin,Additional 750 GBP off first customer install through the scheme.,https://www.daikin.co.uk/en_gb/installer/partner-programmes/sustainable-home-network/nesta.html,2026-09,medium
