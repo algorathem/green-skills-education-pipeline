@@ -2,8 +2,11 @@
 
 Find **course costs**, **future / green-skills programmes**, **labour-market stats**, and **cost-per-person vs quality from reviews**.
 
+**If you do not use GitHub:** open the standalone briefing PDF and email it as a file.
+
 | Start here | File |
 | --- | --- |
+| **PDF for non-technical readers** | [reports/Green-Skills-Education-Briefing.pdf](reports/Green-Skills-Education-Briefing.pdf) |
 | How the whole pipeline works | [PIPELINE.md](PIPELINE.md) |
 | First-run analysis + graphs | [reports/cost-quality-report.md](reports/cost-quality-report.md) |
 | Raw course costs & ratings | [data/courses.csv](data/courses.csv) |
@@ -18,4 +21,5 @@ Find **course costs**, **future / green-skills programmes**, **labour-market sta
 
 ```bash
 python scripts/analyze.py
+python scripts/build_pdf.py
 ```
