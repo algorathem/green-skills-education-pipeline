@@ -59,3 +59,4 @@ Primary documents used to populate the CSVs. Prefer these over secondary blogs w
 - SCTP Sustainable Urban Environments
 - Green Skills Committee Report 2025: https://jobsandskills.skillsfuture.gov.sg/resources/GSC-Report-2025.pdf
 - FX: SGDUSD 0.78 used for NTU rows in this snapshot
+- MySkillsFuture open course directory (data.gov.sg dataset d_b5802b76f409764c16dde4bf2feb19cd): poll-download via https://api-open.data.gov.sg/v1/public/api/datasets/d_b5802b76f409764c16dde4bf2feb19cd/poll-download — ingested by scripts/ingest_myskillsfuture.py into data/myskillsfuture_green_dump.csv. Lookup pattern: https://skillsfuture.gobusiness.gov.sg/course-directory/courses/{TGS}

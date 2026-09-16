@@ -705,6 +705,43 @@ def chart_mcs_pathways():
     return save(fig, "12_mcs_vs_umbrella_cost.png")
 
 
+def chart_msf_dump():
+    path = DATA / "myskillsfuture_green_dump.csv"
+    if not path.exists():
+        return None
+    d = pd.read_csv(path)
+    fig, axes = plt.subplots(1, 2, figsize=(13.5, 6.2), layout="constrained")
+    top = d["trainingprovideralias"].value_counts().head(12).sort_values()
+    axes[0].barh([" ".join(str(x).split()[:5]) for x in top.index], top.values, color=TEAL)
+    axes[0].set_xlabel("Number of green-titled courses in the dump")
+    axes[0].set_title("Top SkillsFuture providers (open directory)")
+    for y, v in enumerate(top.values):
+        axes[0].text(v + 1, y, str(int(v)), va="center", fontsize=8, color=NAVY)
+
+    cl = (
+        d.groupby("skill_cluster")
+        .agg(n=("coursereferencenumber", "count"), med_list=("full_course_fee", "median"), med_nett=("course_fee_after_subsidies", "median"))
+        .sort_values("n")
+    )
+    y = range(len(cl))
+    axes[1].barh(y, cl["med_list"], color=NAVY, height=0.35, label="Median list fee (SGD)")
+    axes[1].barh([i + 0.35 for i in y], cl["med_nett"], color=GREEN, height=0.35, label="Median fee after SSG (SGD)")
+    axes[1].set_yticks([i + 0.17 for i in y], [CLUSTER_LABEL.get(c, c) for c in cl.index])
+    axes[1].set_xlabel("Singapore dollars")
+    axes[1].set_title("Median list vs after-SSG fee by cluster")
+    xmax = float(cl["med_list"].max()) * 1.38
+    axes[1].set_xlim(0, xmax)
+    axes[1].legend(loc="upper right", framealpha=0.95)
+    med_list = f"{d['full_course_fee'].median():,.0f}"
+    med_nett = f"{d['course_fee_after_subsidies'].median():,.0f}"
+    fig.suptitle(
+        f"MySkillsFuture open dump: {len(d):,} green-titled courses  |  median list SGD {med_list}  |  median after SSG SGD {med_nett}",
+        fontsize=12,
+        fontweight="bold",
+    )
+    return save(fig, "13_myskillsfuture_green_dump.png")
+
+
 def write_report(scored: pd.DataFrame, charts: list[Path]):
     best_value = scored.sort_values("value_score", ascending=False).head(5)
     best_quality = scored.sort_values("quality_index", ascending=False).head(5)
@@ -729,6 +766,43 @@ def write_report(scored: pd.DataFrame, charts: list[Path]):
         return "\n".join(lines)
 
     rel = lambda p: f"../output/{p.name}"
+    dump_png = next((c for c in charts if "13_myskillsfuture" in c.name), None)
+    dump_section = ""
+    dump_path = DATA / "myskillsfuture_green_dump.csv"
+    if dump_path.exists():
+        d = pd.read_csv(dump_path)
+        cl_counts = d["skill_cluster"].value_counts()
+        cl_lines = "\n".join(
+            f"| {CLUSTER_LABEL.get(k, k)} | {int(v)} |" for k, v in cl_counts.items()
+        )
+        dump_img = f"![MySkillsFuture open dump]({rel(dump_png)})" if dump_png else ""
+        dump_section = f"""## SkillsFuture open directory dump (this refresh)
+
+The scored catalogue stays **{len(scored)}** courses. Dumping every TGS onto the quality scatter would make it unreadable.
+
+`scripts/ingest_myskillsfuture.py` pulled the public MySkillsFuture directory (data.gov.sg dataset `d_b5802b76f409764c16dde4bf2feb19cd`, 25,813 rows) and kept green-titled unique TGS codes. Filter is title-first (sustainability, carbon, solar, SCEM, ISSB, heat pump, etc.) plus a short about-text list (SFGW / SR BOK / SCEM / Green Mark). Excludes green belt, HR analytics, social media, passenger service, and similar false positives.
+
+| Signal | Figure |
+| --- | ---: |
+| Green-titled unique TGS | **{len(d):,}** |
+| Already in the scored catalogue | {int(d["already_in_scored_catalogue"].sum())} |
+| New inventory rows | {int((~d["already_in_scored_catalogue"]).sum())} |
+| Median list fee | S${d["full_course_fee"].median():,.0f} |
+| Median fee after SSG | S${d["course_fee_after_subsidies"].median():,.0f} |
+| Rows with star ratings | {int(d["courseratings_stars"].notna().sum())} (median {d["courseratings_stars"].median():.1f}) |
+
+{dump_img}
+
+**This is inventory, not a quality ranking.** Title clustering is coarse: unmatched titles default to ESG / reporting ({int(cl_counts.get("esg_reporting", 0))} of {len(d)}). Heat-pump / HVAC titles in the open directory: {int(cl_counts.get("heat_pump_hvac", 0))}.
+
+| Cluster | Courses in dump |
+| --- | ---: |
+{cl_lines}
+
+Lookup any TGS at `https://skillsfuture.gobusiness.gov.sg/course-directory/courses/{{TGS}}`. Full table with clickable URLs: `data/myskillsfuture_green_dump.csv`. Do not merge dump rows into `data/courses.csv` unless you are adding a curated course with credential and employer coding.
+
+"""
+
     body = f"""# Green skills education: cost, quality, and future demand
 
 *Generated from `data/courses.csv`, `data/macro_indicators.csv`, `data/future_skills.csv`.*
@@ -947,6 +1021,8 @@ The SCTP reporting certificate at **$15k list** is the ISSB/ACRA compliance stac
 
 This catalogue is **not** all 640+ sustainability CET courses SSG has counted. It is a working sample: NTU plus SkillsFuture Green Workplace (SFGW-SR) programmes, NUS, SMU, SIT, SEAS solar/SCEM, NTUC, Temasek Poly, Vertical Institute. Lookup URLs are in `source_url` on every row. Singapore subsidy bands and nett fees are in `data/sg_subsidy_rules.csv` and `data/sg_course_funding.csv`.
 
+{dump_section}
+
 **What reviews can and cannot do**
 
 - They measure learner satisfaction (clarity, production, instructor).
@@ -967,10 +1043,12 @@ This catalogue is **not** all 640+ sustainability CET courses SSG has counted. I
 ## How to refresh
 
 ```
+python scripts/ingest_myskillsfuture.py
 python scripts/analyze.py
+python scripts/build_pdf.py
 ```
 
-Add rows to `data/courses.csv` (keep column names). Re-run. New PNGs land in `output/`, scored table in `output/courses_scored.csv`, this report in `reports/cost-quality-report.md`.
+Add rows to `data/courses.csv` (keep column names) only for curated scored courses. Re-run analyze. New PNGs land in `output/`, scored table in `output/courses_scored.csv`, this report in `reports/cost-quality-report.md`. Refresh the SkillsFuture dump with `ingest_myskillsfuture.py` (uses a cached `data/raw/myskillsfuture_directory.xlsx` unless you pass refresh).
 
 Full collector map: `PIPELINE.md`.
 """
@@ -998,7 +1076,9 @@ def main():
         chart_cluster(scored),
         chart_conversion_funnel(),
         chart_mcs_pathways(),
+        chart_msf_dump(),
     ]
+    charts = [c for c in charts if c is not None]
     report = write_report(scored, charts)
     print("scored rows:", len(scored))
     print("report:", report)

@@ -18,10 +18,15 @@ Find **course costs**, **future / green-skills programmes**, **labour-market sta
 | Scored table | [output/courses_scored.csv](output/courses_scored.csv) |
 | Singapore subsidy rules | [data/sg_subsidy_rules.csv](data/sg_subsidy_rules.csv) |
 | Singapore course nett fees + TGS codes | [data/sg_course_funding.csv](data/sg_course_funding.csv) |
+| SkillsFuture green dump (lookup inventory, not scored) | [data/myskillsfuture_green_dump.csv](data/myskillsfuture_green_dump.csv) |
 | Heat-pump outcome chart | [output/09_htg_satisfaction_vs_jobs.png](output/09_htg_satisfaction_vs_jobs.png) |
 | Conversion funnel | [output/11_conversion_funnel.png](output/11_conversion_funnel.png) |
+| SkillsFuture dump chart | [output/13_myskillsfuture_green_dump.png](output/13_myskillsfuture_green_dump.png) |
+
+The scored catalogue is **91** curated courses. The dump is **975** green-titled TGS codes from the public MySkillsFuture directory. It is inventory with lookup URLs, not a quality ranking — those rows are not plotted on the cost-vs-quality scatter.
 
 ```bash
+python scripts/ingest_myskillsfuture.py
 python scripts/analyze.py
 python scripts/build_pdf.py
 ```

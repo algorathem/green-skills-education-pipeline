@@ -61,6 +61,7 @@ Search these catalogs in this order. Record provider, URL, hours, level, languag
 | Standard-setters | GHG Protocol Learning Store, GHG Management Institute, GRI Academy, ISSB/IFRS Foundation | Best quality signal for carbon/ESG white-collar work. |
 | Professional / university exec ed | MIT PE, Harvard Extension, Columbia, Imperial, TU Delft | High cost, high brand. |
 | Public / voucher-eligible | OECD questionnaire programmes; national VET; NYSERDA directory (US); UK IfATE / Skills Bootcamps; EU ESCO-aligned VET | Needed for **cost per person** at system level, not just sticker price. |
+| Singapore CET directory | MySkillsFuture open dataset (`d_b5802b76f409764c16dde4bf2feb19cd`) via `scripts/ingest_myskillsfuture.py` | Writes `data/myskillsfuture_green_dump.csv` (lookup inventory). **Do not** dump every TGS into `data/courses.csv` — that wrecks the quality scatter. |
 | Employer academies | Octopus heat-pump academy, Trane TAP, utility line-schools | Often free to the learner (wage-paid). Cost is employer’s. |
 
 **Future courses** = demand signal with thin catalog. Build a watchlist from:
@@ -162,8 +163,9 @@ python scripts/analyze.py
 Writes:
 
 - `output/courses_scored.csv`
-- `output/01_cost_vs_quality.png` … `08_cost_vs_wage.png`
+- `output/01_cost_vs_quality.png` … `13_myskillsfuture_green_dump.png`
 - `reports/cost-quality-report.md`
+- `reports/Green-Skills-Education-Briefing.pdf` (via `scripts/build_pdf.py`)
 
 ---
 
@@ -178,6 +180,7 @@ Writes:
 | Course discovery index | Class Central (no official public API; HTML + existing reports) |
 | Reviews | Platform pages; Class Central aggregates; Trustpilot for bootcamps |
 | Job ads | Lightcast (paid), Adzuna API, or Google Jobs |
+| Singapore course directory | data.gov.sg poll-download for dataset `d_b5802b76f409764c16dde4bf2feb19cd` (XLSX, ~25k TGS rows) |
 
 There is **no** good public API for Udemy review text at scale. Budget time for manual/sample pulls, or licensed data.
 

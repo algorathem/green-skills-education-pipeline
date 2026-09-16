@@ -231,13 +231,194 @@ def course_appendix(scored: pd.DataFrame):
     return t
 
 
+CLUSTER_LABEL = {
+    "solar_pv": "Solar PV",
+    "solar_design": "Solar design",
+    "heat_pump_hvac": "Heat pump / HVAC",
+    "ev_mobility": "EV / mobility",
+    "carbon_accounting": "Carbon accounting",
+    "esg_reporting": "ESG / reporting",
+    "energy_management": "Energy management",
+    "energy_systems": "Energy systems / grid",
+}
+
+
+def _plain(text: str) -> str:
+    t = (
+        str(text)
+        .replace("\u2013", "-")
+        .replace("\u2014", "-")
+        .replace("\u2018", "'")
+        .replace("\u2019", "'")
+        .replace("\u201c", '"')
+        .replace("\u201d", '"')
+        .replace("\u00e2\u20ac\u201c", "-")
+        .replace("\u00e2\u20ac\u201d", "-")
+        .replace("\u00e2\u20ac\u2122", "'")
+        .replace("\u00e2\u20ac\u0153", "'")
+    )
+    return t
+
+
+def dump_pages(s):
+    """Inventory page for the MySkillsFuture open dump. Not the scored scatter."""
+    path = ROOT / "data" / "myskillsfuture_green_dump.csv"
+    chart = OUT / "13_myskillsfuture_green_dump.png"
+    bits = [
+        Paragraph("9. SkillsFuture open directory dump", s["h1"]),
+        Paragraph(
+            "The scored catalogue stays 91 courses on purpose. Plotting hundreds of TGS rows on the quality scatter would bury the courses that have credentials and reviews. "
+            "This page is a lookup inventory from the public MySkillsFuture directory (data.gov.sg dataset d_b5802b76f409764c16dde4bf2feb19cd).",
+            s["body"],
+        ),
+    ]
+    if not path.exists():
+        bits.append(Paragraph("Dump file not found. Run python scripts/ingest_myskillsfuture.py.", s["body"]))
+        return bits
+
+    d = pd.read_csv(path)
+    n = len(d)
+    already = int(d["already_in_scored_catalogue"].sum())
+    new = n - already
+    bits.append(
+        table(
+            ["Signal", "Figure"],
+            [
+                ["Directory rows filtered", "25,813 → unique green-titled TGS"],
+                ["Green-titled unique TGS", f"{n:,}"],
+                ["Already in the scored catalogue", str(already)],
+                ["New inventory rows", f"{new:,}"],
+                ["Median list fee", f"S${d['full_course_fee'].median():,.0f}"],
+                ["Median fee after SSG", f"S${d['course_fee_after_subsidies'].median():,.0f}"],
+                ["Rows with star ratings", f"{int(d['courseratings_stars'].notna().sum())} (median {d['courseratings_stars'].median():.1f})"],
+            ],
+            [90 * mm, 90 * mm],
+        )
+    )
+    bits.append(Spacer(1, 6))
+    cl = (
+        d.groupby("skill_cluster")
+        .agg(n=("coursereferencenumber", "count"), med_list=("full_course_fee", "median"), med_nett=("course_fee_after_subsidies", "median"))
+        .sort_values("n", ascending=False)
+    )
+    bits.append(
+        table(
+            ["Cluster (title regex — coarse)", "Courses", "Median list SGD", "Median after SSG SGD"],
+            [
+                [
+                    CLUSTER_LABEL.get(idx, idx),
+                    str(int(r["n"])),
+                    f"S${r['med_list']:,.0f}",
+                    f"S${r['med_nett']:,.0f}",
+                ]
+                for idx, r in cl.iterrows()
+            ],
+            [70 * mm, 30 * mm, 45 * mm, 50 * mm],
+        )
+    )
+    bits.append(Spacer(1, 4))
+    bits.append(
+        Paragraph(
+            "ESG / reporting is the default bucket when a title does not match solar, carbon, energy, EV, or heat-pump patterns. "
+            f"That is why {int(cl.loc['esg_reporting', 'n']) if 'esg_reporting' in cl.index else 0} of {n} sit there — not because Singapore has 741 ISSB courses. "
+            f"Heat-pump / HVAC titles in this dump: {int(cl.loc['heat_pump_hvac', 'n']) if 'heat_pump_hvac' in cl.index else 0}.",
+            s["body"],
+        )
+    )
+    if chart.exists():
+        bits.append(PageBreak())
+        bits.append(Paragraph("Providers and fees in the dump", s["h2"]))
+        bits.append(fit_image(chart, W - 2 * MARGIN, 100 * mm))
+        bits.append(
+            Paragraph(
+                "Figure 13. Left: course counts by training provider. Right: median list fee vs median fee after SSG, Singapore dollars. "
+                "After-SSG is the directory’s published subsidy column, not SkillsFuture Credit on top.",
+                s["caption"],
+            )
+        )
+
+    reviewed = d.dropna(subset=["courseratings_noofrespondents"]).copy()
+    reviewed = reviewed[~reviewed["already_in_scored_catalogue"]].sort_values(
+        "courseratings_noofrespondents", ascending=False
+    ).head(8)
+    if len(reviewed):
+        sample_rows = []
+        for _, r in reviewed.iterrows():
+            url = str(r.get("lookup_url") or "")
+            name = escape(_plain(r["coursetitle"])[:48])
+            if url.startswith("http"):
+                name_html = f'<link href="{escape(url)}">{name}</link>'
+            else:
+                name_html = name
+            stars = "-" if pd.isna(r["courseratings_stars"]) else f"{r['courseratings_stars']:.1f}"
+            nrev = "-" if pd.isna(r["courseratings_noofrespondents"]) else f"{int(r['courseratings_noofrespondents']):,}"
+            sample_rows.append(
+                [
+                    Paragraph(name_html, s["td"]),
+                    Paragraph(escape(_plain(r["trainingprovideralias"])[:28]), s["td"]),
+                    Paragraph(f"SGD {float(r['full_course_fee']):,.0f}", s["td_r"]),
+                    Paragraph(stars, s["td_r"]),
+                    Paragraph(nrev, s["td_r"]),
+                ]
+            )
+        header = [
+            Paragraph("Course (click for lookup)", s["th"]),
+            Paragraph("Provider", s["th"]),
+            Paragraph("List SGD", s["th"]),
+            Paragraph("Stars", s["th"]),
+            Paragraph("Reviews", s["th"]),
+        ]
+        t = Table([header] + sample_rows, colWidths=[88 * mm, 48 * mm, 28 * mm, 22 * mm, 22 * mm], repeatRows=1)
+        t.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), NAVY),
+                    ("ROWBACKGROUNDS", (0, 1), (-1, -1), [WHITE, PALE]),
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                    ("TOPPADDING", (0, 0), (-1, -1), 3),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+                    ("GRID", (0, 0), (-1, -1), 0.25, LINE),
+                    ("TEXTCOLOR", (0, 1), (0, -1), TEAL),
+                ]
+            )
+        )
+        lookup = Paragraph(
+            'Full dump with every TGS lookup: data/myskillsfuture_green_dump.csv. Pattern: '
+            '<link href="https://skillsfuture.gobusiness.gov.sg/course-directory/courses/">https://skillsfuture.gobusiness.gov.sg/course-directory/courses/{TGS}</link>. '
+            "Refresh with python scripts/ingest_myskillsfuture.py. Do not merge these rows into the scored catalogue unless you code credential and employer signal by hand.",
+            s["body"],
+        )
+        bits.append(
+            KeepTogether(
+                [
+                    Paragraph("Most-reviewed dump rows not already in the scored list (click the name)", s["h2"]),
+                    t,
+                    Spacer(1, 4),
+                    lookup,
+                ]
+            )
+        )
+    else:
+        bits.append(
+            Paragraph(
+                'Full dump with every TGS lookup: data/myskillsfuture_green_dump.csv. Pattern: '
+                '<link href="https://skillsfuture.gobusiness.gov.sg/course-directory/courses/">https://skillsfuture.gobusiness.gov.sg/course-directory/courses/{TGS}</link>. '
+                "Refresh with python scripts/ingest_myskillsfuture.py. Do not merge these rows into the scored catalogue unless you code credential and employer signal by hand.",
+                s["body"],
+            )
+        )
+    return bits
+
+
 def build():
     s = styles()
     scored = pd.read_csv(OUT / "courses_scored.csv")
     story = []
 
     # Cover
-    story.append(Paragraph("STANDALONE BRIEFING  ·  91 COURSES  ·  US, UK, SINGAPORE", s["cover_kicker"]))
+    story.append(Paragraph("STANDALONE BRIEFING  ·  91 SCORED COURSES  ·  975 SKILLSFUTURE DUMP  ·  US, UK, SINGAPORE", s["cover_kicker"]))
     story.append(Paragraph("Green skills education", s["cover_title"]))
     story.append(
         Paragraph(
@@ -296,7 +477,7 @@ def build():
     story.append(
         Paragraph(
             "Contents: headlines · cost vs quality · cost bands · future skills · labour-market spend · "
-            "heat-pump conversion · NTU Singapore · method and limits · full course list.",
+            "heat-pump conversion · Singapore SkillsFuture · open directory dump · method and limits · full scored list.",
             s["caption"],
         )
     )
@@ -546,9 +727,9 @@ def build():
     story.append(Paragraph("8. Singapore SkillsFuture — subsidies and courses", s["h1"]))
     story.append(
         Paragraph(
-            "We did not add every SkillsFuture course. SSG has counted 640+ sustainability CET programmes and 13,000+ enrolments. "
-            "This pack now covers the official SFGW-SR reporting list (ISCA, NTU SCTP and FlexiMasters modules, TP, NTUC ISSB and AI stacks) plus the main SEAS SCEM and solar WSQ titles, NUS, SMU, SIT, SP, and Ngee Ann solar diploma. "
-            "Click any course name in the appendix to open the lookup page. Confirm live fees on MySkillsFuture before you pay.",
+            "We did not score every SkillsFuture course. SSG has counted 640+ sustainability CET programmes and 13,000+ enrolments. "
+            "The 91-row catalogue is the scored sample: SFGW-SR (ISCA, NTU SCTP and FlexiMasters, TP, NTUC ISSB and AI stacks) plus SEAS SCEM and solar WSQ, NUS, SMU, SIT, SP, and Ngee Ann solar diploma. "
+            "The next section dumps 975 green-titled TGS codes from the open directory for lookup. Click any scored course name in the appendix to open its page. Confirm live fees on MySkillsFuture before you pay.",
             s["body"],
         )
     )
@@ -621,7 +802,10 @@ def build():
     )
 
     story.append(PageBreak())
-    story.append(Paragraph("9. How quality was scored, and the limits", s["h1"]))
+    story.extend(dump_pages(s))
+
+    story.append(PageBreak())
+    story.append(Paragraph("10. How quality was scored, and the limits", s["h1"]))
     story.append(
         Paragraph(
             "quality_index = 0.35 x (stars / 5 x 100)  +  0.20 x (log10(reviews+1) / 4 x 100)  +  0.25 x credential  +  0.20 x employer signal. "
@@ -650,13 +834,14 @@ def build():
                 "Wages are US occupation medians, not graduate placement. HVAC wage is the heat-pump proxy (no separate BLS heat-pump installer code).",
                 "LinkedIn green skills are self-reported profile skills.",
                 "HTG survey n is about 139 — directional, not a census.",
+                "The SkillsFuture dump is title-filtered inventory. Unmatched titles default to ESG/reporting. After-SSG fees in the dump do not include SkillsFuture Credit.",
                 "This is not legal, careers, or investment advice. Confirm live prices and funding rules before buying a course.",
             ]
         )
     )
 
     story.append(PageBreak())
-    story.append(Paragraph("10. Full course list (click the name to open the source)", s["h1"]))
+    story.append(Paragraph("11. Full scored list (click the name to open the source)", s["h1"]))
     story.append(
         Paragraph(
             "Sorted by cluster then cost. Quality is the 0–100 index. "
@@ -672,7 +857,8 @@ def build():
             "Primary sources include OECD Training Supply for the Green and AI Transitions (2024), OECD Employment Outlook 2024, "
             "WEF Future of Jobs 2025, LinkedIn Green Skills Reports 2024–2025, BLS Occupational Outlook Handbook (May 2025 wages), "
             "UK DfE Employer Skills Survey 2024, DESNZ Heat Training Grant 2025 mid-scheme review, Nesta Start at Home, "
-            "MCS / NICEIC fee tables, Singapore Green Skills Committee Report 2025, and live NTU PACE / NBS fee pages. "
+            "MCS / NICEIC fee tables, Singapore Green Skills Committee Report 2025, live NTU PACE / NBS fee pages, "
+            "and the MySkillsFuture open course directory (data.gov.sg). "
             "Course ratings from Coursera, Udemy, HeatSpring, and MySkillsFuture as dated in the underlying tables.",
             s["caption"],
         )

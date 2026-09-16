@@ -234,6 +234,39 @@ The SCTP reporting certificate at **$15k list** is the ISSB/ACRA compliance stac
 
 This catalogue is **not** all 640+ sustainability CET courses SSG has counted. It is a working sample: NTU plus SkillsFuture Green Workplace (SFGW-SR) programmes, NUS, SMU, SIT, SEAS solar/SCEM, NTUC, Temasek Poly, Vertical Institute. Lookup URLs are in `source_url` on every row. Singapore subsidy bands and nett fees are in `data/sg_subsidy_rules.csv` and `data/sg_course_funding.csv`.
 
+## SkillsFuture open directory dump (this refresh)
+
+The scored catalogue stays **91** courses. Dumping every TGS onto the quality scatter would make it unreadable.
+
+`scripts/ingest_myskillsfuture.py` pulled the public MySkillsFuture directory (data.gov.sg dataset `d_b5802b76f409764c16dde4bf2feb19cd`, 25,813 rows) and kept green-titled unique TGS codes. Filter is title-first (sustainability, carbon, solar, SCEM, ISSB, heat pump, etc.) plus a short about-text list (SFGW / SR BOK / SCEM / Green Mark). Excludes green belt, HR analytics, social media, passenger service, and similar false positives.
+
+| Signal | Figure |
+| --- | ---: |
+| Green-titled unique TGS | **975** |
+| Already in the scored catalogue | 19 |
+| New inventory rows | 956 |
+| Median list fee | S$1,698 |
+| Median fee after SSG | S$600 |
+| Rows with star ratings | 335 (median 4.0) |
+
+![MySkillsFuture open dump](../output/13_myskillsfuture_green_dump.png)
+
+**This is inventory, not a quality ranking.** Title clustering is coarse: unmatched titles default to ESG / reporting (741 of 975). Heat-pump / HVAC titles in the open directory: 5.
+
+| Cluster | Courses in dump |
+| --- | ---: |
+| ESG / reporting | 741 |
+| Carbon accounting | 108 |
+| Energy management | 38 |
+| Solar PV | 33 |
+| Energy systems / grid | 28 |
+| EV / mobility | 22 |
+| Heat pump / HVAC | 5 |
+
+Lookup any TGS at `https://skillsfuture.gobusiness.gov.sg/course-directory/courses/{TGS}`. Full table with clickable URLs: `data/myskillsfuture_green_dump.csv`. Do not merge dump rows into `data/courses.csv` unless you are adding a curated course with credential and employer coding.
+
+
+
 **What reviews can and cannot do**
 
 - They measure learner satisfaction (clarity, production, instructor).
@@ -254,9 +287,11 @@ This catalogue is **not** all 640+ sustainability CET courses SSG has counted. I
 ## How to refresh
 
 ```
+python scripts/ingest_myskillsfuture.py
 python scripts/analyze.py
+python scripts/build_pdf.py
 ```
 
-Add rows to `data/courses.csv` (keep column names). Re-run. New PNGs land in `output/`, scored table in `output/courses_scored.csv`, this report in `reports/cost-quality-report.md`.
+Add rows to `data/courses.csv` (keep column names) only for curated scored courses. Re-run analyze. New PNGs land in `output/`, scored table in `output/courses_scored.csv`, this report in `reports/cost-quality-report.md`. Refresh the SkillsFuture dump with `ingest_myskillsfuture.py` (uses a cached `data/raw/myskillsfuture_directory.xlsx` unless you pass refresh).
 
 Full collector map: `PIPELINE.md`.
