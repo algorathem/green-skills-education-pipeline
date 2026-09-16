@@ -237,7 +237,7 @@ def build():
     story = []
 
     # Cover
-    story.append(Paragraph("STANDALONE BRIEFING  ·  71 COURSES  ·  US, UK, SINGAPORE", s["cover_kicker"]))
+    story.append(Paragraph("STANDALONE BRIEFING  ·  91 COURSES  ·  US, UK, SINGAPORE", s["cover_kicker"]))
     story.append(Paragraph("Green skills education", s["cover_title"]))
     story.append(
         Paragraph(
@@ -547,7 +547,7 @@ def build():
     story.append(
         Paragraph(
             "We did not add every SkillsFuture course. SSG has counted 640+ sustainability CET programmes and 13,000+ enrolments. "
-            "This pack is a working sample: NTU, plus the official SkillsFuture Green Workplace (SFGW-SR) list, NUS, SMU, SIT, SEAS (solar/SCEM), NTUC, Temasek Polytechnic, Singapore Polytechnic, and Vertical Institute. "
+            "This pack now covers the official SFGW-SR reporting list (ISCA, NTU SCTP and FlexiMasters modules, TP, NTUC ISSB and AI stacks) plus the main SEAS SCEM and solar WSQ titles, NUS, SMU, SIT, SP, and Ngee Ann solar diploma. "
             "Click any course name in the appendix to open the lookup page. Confirm live fees on MySkillsFuture before you pay.",
             s["body"],
         )

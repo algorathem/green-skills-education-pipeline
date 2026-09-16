@@ -45,9 +45,9 @@ How to read it:
 | --- | --- | --- | --- | --- | --- | --- |
 | NABCEP PV Installation Professional Certificatio | HeatSpring | 1795 | 4.72 | 1,080 | 92.21 | https://www.heatspring.com/courses/58-hour-nabce |
 | Solar PV Boot Camp + NABCEP PV Associate Exam Pr | HeatSpring / Sean White | 895 | 4.72 | 1,046 | 91.54 | https://www.heatspring.com/solar-pv-boot-camp-na |
+| SCEM WSQ Air Conditioning and Mechanical Ventila | SEAS | 819 | 4.50 | 224.00 | 85.46 | https://courses.myskillsfuture.gov.sg/search?TP_ |
 | SCEM WSQ Energy Measurement and Audit | SEAS | 780 | 4.50 | 216.00 | 85.18 | https://courses.myskillsfuture.gov.sg/search?TP_ |
 | EPA 608 Technician Certification | HeatSpring / Brynn Cooksey | 125 | 4.50 | 128.00 | 84.65 | https://www.heatspring.com/courses/nys-clean-hea |
-| Renewable Energy Specialization | Coursera / University of Colorado Boulder | 199 | 4.80 | 1,367 | 84.28 | https://www.coursera.org/specializations/renewab |
 
 ### Best value (quality adjusted for log cost)
 
@@ -64,10 +64,10 @@ How to read it:
 | name | cost_usd_typical | rating | n_reviews | quality_index |
 | --- | --- | --- | --- | --- |
 | PVsyst solar design (Udemy Najdeah) | 18 | 4.60 | 2,000 | 70.21 |
-| Solar Energy System Design | 49 | 4.70 | 480.00 | 79.31 |
-| Solar Energy and Electrical System Design | 49 | 4.70 | 733.00 | 80.83 |
 | Solar Energy Systems Overview | 49 | 4.70 | 874.00 | 80.01 |
-| Photovoltaic Systems | 49 | 4.60 | 161.00 | 76.45 |
+| Solar Energy and Electrical System Design | 49 | 4.70 | 733.00 | 80.83 |
+| Solar Energy Basics | 49 | 4.80 | 2,600 | 81.68 |
+| Solar Energy System Design | 49 | 4.70 | 480.00 | 79.31 |
 
 ![Value for money](../output/02_value_for_money.png)
 
