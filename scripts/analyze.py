@@ -12,11 +12,15 @@ Quality per $100 = quality / (cost/100)
 from __future__ import annotations
 
 import math
+import textwrap
 from pathlib import Path
 
+import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.lines import Line2D
+from matplotlib.ticker import FuncFormatter
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
@@ -39,6 +43,33 @@ ORANGE = "#E07A3D"
 GOLD = "#C9A227"
 GRAY = "#6B7280"
 RED = "#C0392B"
+
+CRED_COLOR = {
+    "industry_license": GREEN,
+    "professional_standard": TEAL,
+    "university": NAVY,
+    "university_certificate": NAVY,
+    "platform_cert": ORANGE,
+}
+CRED_LABEL = {
+    "industry_license": "Industry license",
+    "professional_standard": "Professional standard",
+    "university": "University / CET",
+    "university_certificate": "University certificate",
+    "platform_cert": "Platform certificate",
+}
+CLUSTER_LABEL = {
+    "solar_pv": "Solar PV",
+    "solar_design": "Solar design",
+    "renewables": "Renewables (general)",
+    "heat_pump_hvac": "Heat pump / HVAC",
+    "ev_mobility": "EV / mobility",
+    "carbon_accounting": "Carbon accounting",
+    "esg_reporting": "ESG / reporting",
+    "energy_management": "Energy management",
+    "energy_systems": "Energy systems / grid",
+    "mixed_green": "Mixed green stack",
+}
 
 
 def load_courses() -> pd.DataFrame:
@@ -114,243 +145,389 @@ def style():
             "axes.titlesize": 13,
             "axes.titleweight": "bold",
             "axes.labelsize": 10,
-            "figure.dpi": 140,
+            "figure.dpi": 160,
+            "legend.frameon": True,
+            "legend.fontsize": 8.5,
         }
     )
 
 
 def save(fig, name: str):
     path = OUT / name
-    fig.tight_layout()
-    fig.savefig(path, bbox_inches="tight")
+    fig.savefig(path, bbox_inches="tight", dpi=160, facecolor="white")
     plt.close(fig)
     return path
 
 
+def usd_label(v: float) -> str:
+    if v <= 0:
+        return "$0"
+    if v < 1000:
+        return f"${v:,.0f}"
+    return f"${v:,.0f}"
+
+
+def log_usd_axis(ax, which: str = "x"):
+    fmt = FuncFormatter(lambda v, _p: usd_label(v) if v >= 1 else "$0")
+    if which == "x":
+        ax.xaxis.set_major_formatter(fmt)
+    else:
+        ax.yaxis.set_major_formatter(fmt)
+
+
+def cred_handles(include_norev: bool = True):
+    hs = [
+        Line2D([0], [0], marker="o", color="w", markerfacecolor=GREEN, markersize=9, label="Industry license"),
+        Line2D([0], [0], marker="o", color="w", markerfacecolor=NAVY, markersize=9, label="University / CET"),
+        Line2D([0], [0], marker="o", color="w", markerfacecolor=TEAL, markersize=9, label="Professional standard"),
+        Line2D([0], [0], marker="o", color="w", markerfacecolor=ORANGE, markersize=9, label="Platform certificate"),
+    ]
+    if include_norev:
+        hs.append(
+            Line2D([0], [0], marker="D", color=GRAY, markerfacecolor="w", markersize=8, label="No public star reviews")
+        )
+    return hs
+
+
+def wrap_name(name: str, width: int = 40) -> str:
+    return "\n".join(textwrap.wrap(str(name), width=width)[:2])
+
+
+def numbered_key(ax_key, labels: list[str], title: str = "Numbered key"):
+    ax_key.axis("off")
+    ax_key.set_xlim(0, 1)
+    ax_key.set_ylim(0, 1)
+    ax_key.set_title(title, loc="left", fontsize=10, pad=6)
+    n = len(labels)
+    cols = 2 if n > 16 else 1
+    per_col = int(math.ceil(n / cols))
+    for i, lab in enumerate(labels):
+        col = i // per_col
+        row = i % per_col
+        x = 0.0 + col * 0.52
+        y = 0.98 - row * (0.92 / max(per_col - 1, 1))
+        ax_key.text(x, y, f"{i + 1:>2}. {lab}", fontsize=6.4, va="center", ha="left")
+
+
 def chart_scatter(scored: pd.DataFrame):
-    fig, ax = plt.subplots(figsize=(11, 7))
-    reviewed = scored[scored["has_reviews"]]
-    norev = scored[~scored["has_reviews"]]
-    sizes = (np.log10(reviewed["n_reviews"].fillna(1) + 1) * 80).clip(40, 400)
-    colors = reviewed["credential_type"].map(
-        {
-            "industry_license": GREEN,
-            "professional_standard": TEAL,
-            "university": NAVY,
-            "university_certificate": NAVY,
-            "platform_cert": ORANGE,
-        }
-    ).fillna(GRAY)
-    reviewed = reviewed.copy()
-    norev = norev.copy()
-    reviewed["plot_cost"] = reviewed["cost_usd_typical"].clip(lower=1)
-    norev["plot_cost"] = norev["cost_usd_typical"].clip(lower=1)
+    plot = scored.sort_values(["cost_usd_typical", "name"]).reset_index(drop=True)
+    plot["n"] = np.arange(1, len(plot) + 1)
+    plot["plot_cost"] = plot["cost_usd_typical"].clip(lower=1)
+    fig = plt.figure(figsize=(17.2, 10.0))
+    gs = gridspec.GridSpec(1, 2, width_ratios=[1.25, 1.15], wspace=0.12)
+    ax = fig.add_subplot(gs[0])
+    ax_key = fig.add_subplot(gs[1])
+    rev = plot[plot["has_reviews"]]
+    norev = plot[~plot["has_reviews"]]
+    sizes = (np.log10(rev["n_reviews"].fillna(1) + 1) * 70).clip(36, 280)
     ax.scatter(
-        reviewed["plot_cost"],
-        reviewed["quality_index"],
+        rev["plot_cost"],
+        rev["quality_index"],
         s=sizes,
-        c=colors,
-        alpha=0.85,
+        c=rev["credential_type"].map(CRED_COLOR).fillna(GRAY),
+        alpha=0.88,
         edgecolors="white",
-        linewidths=0.6,
+        linewidths=0.5,
         zorder=3,
     )
     ax.scatter(
         norev["plot_cost"],
         norev["quality_index"],
-        s=90,
-        facecolors="none",
-        edgecolors=GRAY,
-        linewidths=1.4,
+        s=70,
+        facecolors="white",
+        edgecolors=norev["credential_type"].map(CRED_COLOR).fillna(GRAY),
+        linewidths=1.6,
         marker="D",
-        label="No public star reviews",
         zorder=2,
     )
-    label_ids = set(
-        pd.concat(
-            [
-                scored.nlargest(8, "quality_index")["id"],
-                scored.nsmallest(4, "cost_usd_typical")["id"],
-                scored.nlargest(3, "cost_usd_typical")["id"],
-            ]
-        )
-    )
-    for _, r in scored.iterrows():
-        if r["id"] not in label_ids:
-            continue
-        short = r["name"][:28] + ("…" if len(str(r["name"])) > 28 else "")
+    logx = np.log10(plot["plot_cost"].to_numpy())
+    qy = plot["quality_index"].to_numpy()
+    ox = np.zeros(len(plot))
+    oy = np.zeros(len(plot))
+    for i in range(len(plot)):
+        for j in range(i):
+            if abs(logx[i] - logx[j]) < 0.14 and abs(qy[i] - qy[j]) < 2.4:
+                ox[i] = 9 if (i % 2 == 0) else -9
+                oy[i] = 8 + 5 * ((i + j) % 3)
+                break
+    for i, r in plot.iterrows():
         ax.annotate(
-            short,
-            (max(float(r["cost_usd_typical"]), 1.0), r["quality_index"]),
+            str(int(r["n"])),
+            (r["plot_cost"], r["quality_index"]),
             textcoords="offset points",
-            xytext=(6, 4),
-            fontsize=7.5,
+            xytext=(ox[i], oy[i]),
+            ha="center",
+            va="center",
+            fontsize=6.2,
             color=NAVY,
-            alpha=0.95,
+            zorder=4,
+            bbox=dict(boxstyle="circle,pad=0.16", fc="white", ec="#D1D5DB", lw=0.4, alpha=0.95),
         )
     ax.set_xscale("log")
-    ax.set_xlabel("Typical cost per person (USD, log scale)")
-    ax.set_ylabel("Quality index (0–100)")
-    ax.set_title("Cost per person vs quality of skill (reviews + credential + employer signal)")
-    ax.set_ylim(30, 100)
-    handles = [
-        plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=GREEN, markersize=10, label="Industry license"),
-        plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=NAVY, markersize=10, label="University"),
-        plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=TEAL, markersize=10, label="Professional standard"),
-        plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=ORANGE, markersize=10, label="Platform certificate"),
-        plt.Line2D([0], [0], marker="D", color=GRAY, markerfacecolor="w", markersize=8, label="No public reviews"),
-    ]
-    ax.legend(handles=handles, loc="lower right", frameon=True)
+    ax.set_xlim(0.7, 30000)
+    ax.set_ylim(32, 98)
+    log_usd_axis(ax, "x")
+    ax.set_xlabel("Typical unsubsidised cost per person (US dollars, log scale)")
+    ax.set_ylabel("Quality index (0–100 composite score)")
+    ax.set_title("Cost per person vs quality")
+    ax.legend(handles=cred_handles(), loc="lower right", title="Credential (colour)")
     ax.text(
-        0.01,
+        0.0,
         -0.14,
-        "Bubble size ∝ log(review count). Quality = 35% stars + 20% review confidence + 25% credential + 20% employer recognition.",
+        "Each number is one course (key at right). Filled circles = public star reviews (size = review count). "
+        "Diamonds = no public stars. Quality = 35% stars + 20% review confidence + 25% credential + 20% employer signal.",
         transform=ax.transAxes,
         fontsize=8,
         color=GRAY,
     )
+    key_labels = [f"{str(r['name'])[:32]}  {usd_label(r['cost_usd_typical'])}" for _, r in plot.iterrows()]
+    numbered_key(ax_key, key_labels, "All 52 courses (by cost) · USD")
     return save(fig, "01_cost_vs_quality.png")
 
 
 def chart_value(scored: pd.DataFrame):
     top = scored.sort_values("value_score", ascending=True).tail(12)
-    fig, ax = plt.subplots(figsize=(10, 6.5))
-    colors = [
-        GREEN if v >= top["value_score"].median() else TEAL for v in top["value_score"]
-    ]
-    ax.barh(top["name"].str.slice(0, 42), top["value_score"], color=colors)
-    ax.set_xlabel("Value score  =  quality / log10(cost + 10)")
-    ax.set_title("Best quality for the money (top 12)")
+    fig, ax = plt.subplots(figsize=(11, 7), layout="constrained")
+    colors = [GREEN if v >= top["value_score"].median() else TEAL for v in top["value_score"]]
+    y = np.arange(len(top))
+    ax.barh(y, top["value_score"], color=colors, height=0.72)
+    ax.set_yticks(y)
+    ax.set_yticklabels([wrap_name(n, 38) for n in top["name"]], fontsize=8.5)
+    for yi, v, cost, q in zip(y, top["value_score"], top["cost_usd_typical"], top["quality_index"]):
+        ax.text(v + 0.4, yi, f"{v:.1f}   (quality {q:.0f} · {usd_label(cost)})", va="center", fontsize=7.5, color=NAVY)
+    ax.set_xlabel("Value score  =  quality index ÷ log10(cost USD + 10)   [unitless; higher is better]")
+    ax.set_title("Best quality for the money (top 12 of 52)")
+    ax.set_xlim(0, top["value_score"].max() * 1.38)
+    ax.legend(
+        handles=[
+            Line2D([0], [0], color=GREEN, lw=8, label="At or above median of this top-12"),
+            Line2D([0], [0], color=TEAL, lw=8, label="Below median of this top-12"),
+        ],
+        loc="lower right",
+    )
     return save(fig, "02_value_for_money.png")
 
 
 def chart_cost_ladder(scored: pd.DataFrame):
-    order = scored.sort_values("cost_usd_typical")
-    h = max(7.0, 0.28 * len(order) + 1.5)
-    fig, ax = plt.subplots(figsize=(11, h))
-    colors = order["credential_type"].map(
-        {
-            "industry_license": GREEN,
-            "professional_standard": TEAL,
-            "university": NAVY,
-            "university_certificate": NAVY,
-            "platform_cert": ORANGE,
-        }
-    ).fillna(GRAY)
-    ax.barh(order["name"].str.slice(0, 40), order["cost_usd_typical"], color=colors)
-    ax.set_xlabel("Typical cost per person (USD)")
-    ax.set_title("Green-skills course cost ladder")
-    ax.set_xscale("log")
+    groups = list(scored.groupby("skill_cluster"))
+    groups.sort(key=lambda kv: kv[1]["cost_usd_typical"].median())
+    heights = [max(1.35, 0.42 * len(g) + 0.55) for _, g in groups]
+    fig, axes = plt.subplots(
+        len(groups),
+        1,
+        figsize=(12.2, sum(heights) + 1.4),
+        sharex=True,
+        gridspec_kw={"height_ratios": heights},
+    )
+    if len(groups) == 1:
+        axes = [axes]
+    for ax, (cl, g) in zip(axes, groups):
+        g = g.sort_values("cost_usd_typical")
+        y = np.arange(len(g))
+        colors = g["credential_type"].map(CRED_COLOR).fillna(GRAY)
+        ax.barh(y, g["cost_usd_typical"].clip(lower=0.8), color=colors, height=0.68)
+        ax.set_yticks(y)
+        ax.set_yticklabels([wrap_name(n, 36) for n in g["name"]], fontsize=7.6)
+        ax.set_xscale("log")
+        ax.set_xlim(0.7, 28000)
+        ax.set_ylabel(CLUSTER_LABEL.get(cl, cl), fontsize=8.5, fontweight="bold", rotation=0, ha="right", va="center", labelpad=8)
+        ax.tick_params(axis="x", labelbottom=False)
+        ax.grid(axis="y", visible=False)
+        for yi, cost in zip(y, g["cost_usd_typical"]):
+            ax.text(max(float(cost), 1.0) * 1.12, yi, usd_label(cost), va="center", fontsize=7, color=NAVY)
+    axes[-1].tick_params(axis="x", labelbottom=True)
+    log_usd_axis(axes[-1], "x")
+    axes[-1].set_xlabel("Typical unsubsidised cost per person (US dollars, log scale)")
+    axes[0].set_title("Course cost ladder by skill cluster — every course, dollar amount on the bar")
+    fig.legend(handles=cred_handles(include_norev=False), loc="upper center", ncol=4, bbox_to_anchor=(0.55, 1.0))
+    fig.subplots_adjust(top=0.96, hspace=0.35)
     return save(fig, "03_cost_ladder.png")
 
 
 def chart_gap():
-    fig, ax = plt.subplots(figsize=(8.5, 5))
-    years = ["2023–24\n(LinkedIn 2024 report)", "2024–25\n(LinkedIn 2025 report)"]
+    fig, ax = plt.subplots(figsize=(9, 5.4), layout="constrained")
+    years = ["2023–24\nLinkedIn 2024 report", "2024–25\nLinkedIn 2025 report"]
     demand = [11.6, 7.7]
     supply = [5.6, 4.3]
     x = np.arange(len(years))
-    w = 0.35
-    b1 = ax.bar(x - w / 2, demand, w, color=ORANGE, label="Green hiring / demand growth")
-    b2 = ax.bar(x + w / 2, supply, w, color=GREEN, label="Green skills supply growth")
-    ax.bar_label(b1, fmt="%.1f%%", padding=3)
-    ax.bar_label(b2, fmt="%.1f%%", padding=3)
+    w = 0.34
+    b1 = ax.bar(x - w / 2, demand, w, color=ORANGE, label="Green hiring growth (demand)")
+    b2 = ax.bar(x + w / 2, supply, w, color=GREEN, label="Share of workers with green skills (supply)")
+    ax.bar_label(b1, fmt="%.1f%%", padding=3, fontsize=9)
+    ax.bar_label(b2, fmt="%.1f%%", padding=3, fontsize=9)
     ax.set_xticks(x, years)
-    ax.set_ylabel("Year-over-year growth (%)")
-    ax.set_title("Green hiring is still growing ~2× faster than green skills")
-    ax.legend()
-    ax.set_ylim(0, 15)
+    ax.set_ylabel("Year-over-year change (percent)")
+    ax.set_title("Green hiring still grows about 2× faster than green skills")
+    ax.legend(title="Metric (same unit: % per year)")
+    ax.set_ylim(0, 16)
     return save(fig, "04_hiring_vs_skills_gap.png")
 
 
 def chart_future():
-    labels = [
-        "Solar PV installers\n(BLS 2025–35)",
-        "Wind turbine techs\n(BLS 2025–35)",
-        "HVAC techs\n(BLS 2025–35)",
-        "Climate mitigation\n(WEF employer %)",
-        "Climate adaptation\n(WEF employer %)",
-        "Skills changing\nby 2030 (WEF)",
-        "Green hires in\nnon-green titles",
+    fig, axes = plt.subplots(1, 3, figsize=(13.8, 5.2), layout="constrained")
+    panels = [
+        (
+            axes[0],
+            "US job outlook\n(BLS employment change, 2025–35)",
+            ["Solar PV\ninstallers", "Wind turbine\ntechnicians", "HVAC\nmechanics"],
+            [37, 30, 11],
+            GREEN,
+            "Percent change in employment",
+        ),
+        (
+            axes[1],
+            "Employer expectations by 2030\n(WEF Future of Jobs 2025)",
+            ["Climate\nmitigation\ntransforms firm", "Climate\nadaptation\ntransforms firm", "Key skills\nwill change"],
+            [47, 41, 39],
+            ORANGE,
+            "Percent of surveyed employers",
+        ),
+        (
+            axes[2],
+            "How green hires show up\n(LinkedIn 2025)",
+            ["Green hires in\nnon-green job titles"],
+            [53],
+            TEAL,
+            "Percent of green hires",
+        ),
     ]
-    values = [37, 30, 11, 47, 41, 39, 53]
-    colors = [GREEN, TEAL, TEAL, ORANGE, GOLD, NAVY, GREEN]
-    fig, ax = plt.subplots(figsize=(10, 5.5))
-    bars = ax.bar(labels, values, color=colors)
-    ax.bar_label(bars, fmt="%.0f%%", padding=3)
-    ax.set_ylabel("Percent")
-    ax.set_title("Future-course demand signals (jobs, skills, regulation)")
-    ax.set_ylim(0, 65)
+    for ax, title, labs, vals, color, ylab in panels:
+        bars = ax.bar(labs, vals, color=color, width=0.55)
+        ax.bar_label(bars, fmt="%.0f%%", padding=3, fontsize=9)
+        ax.set_title(title, fontsize=10)
+        ax.set_ylabel(ylab)
+        ax.set_ylim(0, max(vals) * 1.25)
+    fig.suptitle("Future-course demand signals — each panel has its own unit", fontsize=13, fontweight="bold")
     return save(fig, "05_future_demand_signals.png")
 
 
 def chart_macro_cost():
-    fig, ax = plt.subplots(figsize=(9, 5.2))
-    labels = [
-        "UK spend / trainee\n(ESS 2024, GBP)",
-        "UK construction\nspend / trainee",
-        "Croatia green/digital\nvoucher (EUR)",
-        "Australia apprentice\nincentive (AUD)",
-        "US solar installer\nmedian wage (USD)",
-        "US wind tech\nmedian wage (USD)",
+    # Convert to USD so one axis; original currency stays in the label.
+    rows = [
+        ("UK employer spend per trainee (ESS 2024)", 2710, 2710 * 1.30, "GBP", NAVY, "Training spend"),
+        ("UK construction spend per trainee", 5350, 5350 * 1.30, "GBP", NAVY, "Training spend"),
+        ("Croatia green/digital voucher (max)", 3000, 3000 * 1.10, "EUR", TEAL, "Training voucher"),
+        ("Australia apprentice incentive (max)", 10000, 10000 * 0.67, "AUD", TEAL, "Training voucher"),
+        ("US solar PV installer median wage", 53140, 53140, "USD", GREEN, "Occupation wage"),
+        ("US wind turbine tech median wage", 64120, 64120, "USD", GREEN, "Occupation wage"),
+        ("US HVAC mechanic median wage", 61010, 61010, "USD", GREEN, "Occupation wage"),
     ]
-    values = [2710, 5350, 3000, 10000, 53140, 64120]
-    colors = [NAVY, NAVY, TEAL, TEAL, GREEN, GREEN]
-    bars = ax.barh(labels, values, color=colors)
-    ax.bar_label(bars, fmt="{:,.0f}", padding=4)
-    ax.set_xlabel("Amount (local currency as labeled)")
+    fig, ax = plt.subplots(figsize=(11, 6.2), layout="constrained")
+    y = np.arange(len(rows))
+    ax.barh(y, [r[2] for r in rows], color=[r[4] for r in rows], height=0.7)
+    ax.set_yticks(y)
+    ax.set_yticklabels([r[0] for r in rows], fontsize=9)
+    for yi, orig, usd, cur in [(i, r[1], r[2], r[3]) for i, r in enumerate(rows)]:
+        tag = usd_label(usd) if cur == "USD" else f"{usd_label(usd)}   ({cur} {orig:,.0f})"
+        ax.text(usd * 1.02, yi, tag, va="center", fontsize=8, color=NAVY)
+    ax.set_xlabel("US dollars (FX: GBP 1.30, EUR 1.10, AUD 0.67)")
     ax.set_title("Cost per person: public training spend vs occupation wages")
+    ax.legend(
+        handles=[
+            Line2D([0], [0], color=NAVY, lw=8, label="Employer training spend"),
+            Line2D([0], [0], color=TEAL, lw=8, label="Public voucher / incentive (cap)"),
+            Line2D([0], [0], color=GREEN, lw=8, label="Occupation median wage (BLS)"),
+        ],
+        loc="lower right",
+    )
+    ax.set_xlim(0, 78000)
     return save(fig, "06_cost_per_person_macro.png")
 
 
 def chart_oecd_supply():
-    fig, ax = plt.subplots(figsize=(8, 4.8))
-    ax.barh(
-        ["Green-driven occupations\n(share of OECD workforce)", "GHG-intensive occupations", "Green content in adult courses\n(4-country range, low)", "Green content in adult courses\n(4-country range, high)"],
-        [20, 6, 2.1, 14.1],
-        color=[GREEN, RED, GOLD, TEAL],
-    )
-    ax.set_xlabel("Percent")
+    fig, ax = plt.subplots(figsize=(9.5, 5.2), layout="constrained")
+    labels = [
+        "Green-driven occupations\n(share of OECD workforce)",
+        "GHG-intensive occupations\n(share of OECD workforce)",
+        "Adult courses with green content\n(4-country low: AU, DE, SG, US)",
+        "Adult courses with green content\n(4-country high)",
+    ]
+    vals = [20, 6, 2.1, 14.1]
+    colors = [GREEN, RED, GOLD, TEAL]
+    y = np.arange(len(labels))
+    ax.barh(y, vals, color=colors, height=0.65)
+    ax.set_yticks(y, labels)
+    for yi, v in zip(y, vals):
+        ax.text(v + 0.35, yi, f"{v:g}%", va="center", fontsize=9, color=NAVY)
+    ax.set_xlabel("Percent of workforce or of course catalogue")
     ax.set_title("OECD: green jobs vs green training supply")
     ax.set_xlim(0, 28)
-    for i, v in enumerate([20, 6, 2.1, 14.1]):
-        ax.text(v + 0.4, i, f"{v}%", va="center", fontsize=9)
+    ax.legend(
+        handles=[
+            Line2D([0], [0], color=GREEN, lw=8, label="Jobs that should grow in net-zero (workforce %)"),
+            Line2D([0], [0], color=RED, lw=8, label="Jobs in high-emission industries (workforce %)"),
+            Line2D([0], [0], color=GOLD, lw=8, label="Green share of adult courses — low"),
+            Line2D([0], [0], color=TEAL, lw=8, label="Green share of adult courses — high"),
+        ],
+        loc="lower right",
+        fontsize=8,
+    )
     return save(fig, "07_oecd_jobs_vs_training.png")
 
 
 def chart_roi(scored: pd.DataFrame):
-    sub = scored.dropna(subset=["wage_to_cost_ratio", "target_wage_usd"]).copy()
-    sub = sub[sub["cost_usd_typical"] >= 30]  # skip tiny Udemy sales that explode the ratio
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.scatter(
+    sub = scored.dropna(subset=["target_wage_usd"]).copy()
+    sub = sub[sub["cost_usd_typical"] >= 30].sort_values(["target_occupation", "cost_usd_typical"])
+    occs = list(sub["target_occupation"].astype(str).unique())
+    occ_pos = {o: i for i, o in enumerate(occs)}
+    fig = plt.figure(figsize=(16.8, 9.4))
+    gs = gridspec.GridSpec(1, 2, width_ratios=[1.25, 1.15], wspace=0.12)
+    ax = fig.add_subplot(gs[0])
+    ax_key = fig.add_subplot(gs[1])
+    rng = np.random.default_rng(0)
+    sub = sub.reset_index(drop=True)
+    sub["n"] = np.arange(1, len(sub) + 1)
+    # Spread courses that share an occupation so they do not sit on one line.
+    jitter = []
+    for occ, g in sub.groupby("target_occupation", sort=False):
+        n = len(g)
+        jitter.extend(np.linspace(-0.28, 0.28, n) if n > 1 else [0.0])
+    sub["y"] = [occ_pos[o] + j for o, j in zip(sub["target_occupation"], jitter)]
+    sc = ax.scatter(
         sub["cost_usd_typical"],
-        sub["target_wage_usd"],
-        s=sub["quality_index"] * 3,
+        sub["y"],
+        s=sub["quality_index"] * 2.4,
         c=sub["job_growth_pct"],
         cmap="YlGn",
+        vmin=8,
+        vmax=40,
         edgecolors=NAVY,
-        linewidths=0.5,
-        alpha=0.9,
+        linewidths=0.4,
+        alpha=0.92,
+        zorder=3,
     )
     for _, r in sub.iterrows():
         ax.annotate(
-            str(r["name"])[:28],
-            (r["cost_usd_typical"], r["target_wage_usd"]),
-            fontsize=7,
-            textcoords="offset points",
-            xytext=(5, 3),
+            str(int(r["n"])),
+            (r["cost_usd_typical"], r["y"]),
+            ha="center",
+            va="center",
+            fontsize=6,
+            zorder=4,
+            bbox=dict(boxstyle="circle,pad=0.15", fc="white", ec="#D1D5DB", lw=0.35, alpha=0.9),
         )
     ax.set_xscale("log")
-    ax.set_xlabel("Training cost per person (USD, log)")
-    ax.set_ylabel("Target occupation median wage (USD)")
-    ax.set_title("Training cost vs target wage (bubble = quality; color = job growth %)")
-    cbar = fig.colorbar(ax.collections[0], ax=ax, shrink=0.8)
-    cbar.set_label("Projected job growth %")
+    log_usd_axis(ax, "x")
+    ax.set_yticks(range(len(occs)), [textwrap.fill(o, 28) for o in occs], fontsize=8)
+    ax.set_xlabel("Training cost per person (US dollars, log scale)")
+    ax.set_ylabel("Target occupation (US median wage used as the row)")
+    ax.set_title("Training cost vs occupation — points jittered within each job")
+    cbar = fig.colorbar(sc, ax=ax, shrink=0.72, pad=0.02)
+    cbar.set_label("Projected occupation job growth (%)")
+    ax.legend(
+        handles=[
+            Line2D([0], [0], marker="o", color="w", markerfacecolor=GREEN, markersize=5, label="Smaller = lower quality index"),
+            Line2D([0], [0], marker="o", color="w", markerfacecolor=GREEN, markersize=12, label="Larger = higher quality index"),
+        ],
+        loc="lower right",
+        title="Bubble size",
+    )
+    key_labels = [f"{str(r['name'])[:32]}  {usd_label(r['cost_usd_typical'])}" for _, r in sub.iterrows()]
+    numbered_key(ax_key, key_labels, "Courses on this chart · USD")
     return save(fig, "08_cost_vs_wage.png")
 
 
 def chart_htg_outcomes():
-    """Stars/satisfaction are not job outcomes. UK Heat Training Grant survey."""
     labels = [
         "Satisfied with\nthe course",
         "Confident they\ncan install",
@@ -360,16 +537,28 @@ def chart_htg_outcomes():
     ]
     values = [94, 80, 33, 13, 12]
     colors = [GREEN, TEAL, ORANGE, GOLD, RED]
-    fig, ax = plt.subplots(figsize=(10, 5.4))
-    bars = ax.bar(labels, values, color=colors)
-    ax.bar_label(bars, fmt="%.0f%%", padding=3)
-    ax.set_ylabel("Share of surveyed HTG graduates (%)")
-    ax.set_title("Heat-pump training: reviews look great; work outcomes do not")
-    ax.set_ylim(0, 110)
+    fig, ax = plt.subplots(figsize=(10.5, 5.8), layout="constrained")
+    bars = ax.bar(np.arange(len(labels)), values, color=colors, width=0.62)
+    ax.set_xticks(np.arange(len(labels)), labels)
+    ax.bar_label(bars, fmt="%.0f%%", padding=3, fontsize=9)
+    ax.set_ylabel("Share of surveyed graduates (percent)")
+    ax.set_title("Heat-pump training: course reviews vs work outcomes")
+    ax.set_ylim(0, 112)
+    ax.legend(
+        handles=[
+            Line2D([0], [0], color=GREEN, lw=8, label="Satisfaction with training"),
+            Line2D([0], [0], color=TEAL, lw=8, label="Self-rated ability"),
+            Line2D([0], [0], color=ORANGE, lw=8, label="Did the job (installed)"),
+            Line2D([0], [0], color=GOLD, lw=8, label="Pay rose"),
+            Line2D([0], [0], color=RED, lw=8, label="New MCS (if not already certified)"),
+        ],
+        loc="upper right",
+        fontsize=8,
+    )
     ax.text(
-        0.01,
+        0.0,
         -0.18,
-        "England Heat Training Grant 2025 survey (DESNZ, published Jun 2026). n≈139. 9,100 vouchers redeemed. Grant up to £500.",
+        "England Heat Training Grant 2025 survey (DESNZ, Jun 2026). Sample n ≈ 139. 9,100 vouchers redeemed. Grant up to £500.",
         transform=ax.transAxes,
         fontsize=8,
         color=GRAY,
@@ -380,35 +569,60 @@ def chart_htg_outcomes():
 def chart_cluster(scored: pd.DataFrame):
     g = (
         scored.groupby("skill_cluster", as_index=False)
-        .agg(
-            n=("id", "count"),
-            median_cost=("cost_usd_typical", "median"),
-            mean_quality=("quality_index", "mean"),
-        )
-        .sort_values("mean_quality", ascending=True)
+        .agg(n=("id", "count"), median_cost=("cost_usd_typical", "median"), mean_quality=("quality_index", "mean"))
+        .sort_values("median_cost")
+        .reset_index(drop=True)
     )
-    fig, ax = plt.subplots(figsize=(9.5, 5.5))
+    g["label"] = g["skill_cluster"].map(CLUSTER_LABEL).fillna(g["skill_cluster"])
+    fig, ax = plt.subplots(figsize=(12.2, 6.6), layout="constrained")
     ax.scatter(
         g["median_cost"].clip(lower=1),
         g["mean_quality"],
-        s=g["n"] * 40,
-        c=GREEN,
-        alpha=0.85,
+        s=g["n"] * 55,
+        c=TEAL,
+        alpha=0.8,
         edgecolors=NAVY,
+        zorder=3,
     )
+    # Manual offsets for the crowded high-cost cluster on the right.
+    extra = {
+        "carbon_accounting": (-22, 18),
+        "energy_systems": (16, -24),
+        "esg_reporting": (16, 16),
+        "energy_management": (10, 12),
+        "heat_pump_hvac": (-12, 14),
+        "solar_pv": (10, 10),
+        "solar_design": (-12, 10),
+        "ev_mobility": (10, -14),
+        "renewables": (8, 12),
+        "mixed_green": (10, 10),
+    }
     for _, r in g.iterrows():
+        dx, dy = extra.get(r["skill_cluster"], (10, 8))
         ax.annotate(
-            f"{r['skill_cluster']} (n={int(r['n'])})",
+            f"{r['label']}\n{int(r['n'])} courses · {usd_label(r['median_cost'])}",
             (max(float(r["median_cost"]), 1.0), r["mean_quality"]),
             textcoords="offset points",
-            xytext=(7, 3),
+            xytext=(dx, dy),
             fontsize=8,
+            ha="left" if dx >= 0 else "right",
+            color=NAVY,
+            bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="#E5E7EB", alpha=0.95),
         )
     ax.set_xscale("log")
-    ax.set_xlabel("Median typical cost per person (USD, log)")
-    ax.set_ylabel("Mean quality index")
-    ax.set_title("Skill clusters: cost vs quality (bubble = number of courses)")
-    ax.set_ylim(50, 95)
+    log_usd_axis(ax, "x")
+    ax.set_xlabel("Median typical cost per person (US dollars, log scale)")
+    ax.set_ylabel("Mean quality index (0–100)")
+    ax.set_title("Skill clusters: median cost vs mean quality")
+    ax.set_ylim(52, 92)
+    ax.legend(
+        handles=[
+            Line2D([0], [0], marker="o", color="w", markerfacecolor=TEAL, markersize=6, label="1 course"),
+            Line2D([0], [0], marker="o", color="w", markerfacecolor=TEAL, markersize=14, label="~10 courses"),
+        ],
+        loc="lower right",
+        title="Bubble size = number of courses",
+    )
     return save(fig, "10_cluster_cost_quality.png")
 
 
@@ -422,24 +636,37 @@ def chart_conversion_funnel():
     ]
     values = [100, 94, 80, 33, 12]
     colors = [NAVY, GREEN, TEAL, ORANGE, RED]
-    fig, ax = plt.subplots(figsize=(10, 5.6))
-    bars = ax.bar(labels, values, color=colors)
-    ax.bar_label(bars, fmt="%.0f", padding=3)
-    ax.set_ylabel("Per 100 HTG graduates")
+    fig, ax = plt.subplots(figsize=(10.8, 5.8), layout="constrained")
+    x = np.arange(len(labels))
+    bars = ax.bar(x, values, color=colors, width=0.62)
+    ax.set_xticks(x, labels)
+    ax.bar_label(bars, labels=[f"{v}\nper 100" for v in values], padding=3, fontsize=8.5)
+    ax.set_ylabel("Graduates (index: 100 = everyone in the survey)")
     ax.set_title("Conversion leak: training ≠ first install ≠ MCS")
-    ax.set_ylim(0, 120)
+    ax.set_ylim(0, 125)
     ax.annotate(
-        "−61 never install",
+        "−67 never install\nin this sample",
         xy=(3, 33),
-        xytext=(3.35, 55),
+        xytext=(3.45, 62),
         fontsize=8,
         color=ORANGE,
         arrowprops=dict(arrowstyle="->", color=ORANGE),
     )
+    ax.legend(
+        handles=[
+            Line2D([0], [0], color=NAVY, lw=8, label="Entered training"),
+            Line2D([0], [0], color=GREEN, lw=8, label="Satisfied"),
+            Line2D([0], [0], color=TEAL, lw=8, label="Confident"),
+            Line2D([0], [0], color=ORANGE, lw=8, label="Installed"),
+            Line2D([0], [0], color=RED, lw=8, label="Newly MCS-certified"),
+        ],
+        loc="upper right",
+        fontsize=8,
+    )
     ax.text(
-        0.01,
-        -0.18,
-        "England HTG 2025 (DESNZ). MCS bar is among those not already certified (12%). Industry-wide HPA: ~half of 2023–24 trainees still have no install.",
+        0.0,
+        -0.17,
+        "England HTG 2025 (DESNZ), n ≈ 139. Last bar is among those not already MCS (12%). HPA: ~half of 2023–24 UK trainees still have no install.",
         transform=ax.transAxes,
         fontsize=8,
         color=GRAY,
@@ -448,27 +675,29 @@ def chart_conversion_funnel():
 
 
 def chart_mcs_pathways():
-    """Fee comparison: own MCS vs umbrella vs course-only. GBP then shown as USD."""
     jobs = np.array([1, 3, 5, 10, 20])
-    own = 1090 + 30 * jobs  # official MCS year-1 bundle + per-cert
-    umbrella = 500 * jobs  # HPIN 250 design + 250 audit
-    course = np.full_like(jobs, 702, dtype=float)
-    fig, ax = plt.subplots(figsize=(9.5, 5.6))
-    ax.plot(jobs, own, marker="o", color=NAVY, label="Own MCS year-1 fees + £30/cert")
-    ax.plot(jobs, umbrella, marker="s", color=TEAL, label="HPIN umbrella (£250 design + £250 audit / job)")
-    ax.plot(jobs, course, marker="^", color=ORANGE, linestyle="--", label="L3 course only (£702 inc VAT)")
-    ax.axvline(2.3, color=GRAY, linestyle=":", linewidth=1)
-    ax.text(2.4, 2800, "fee breakeven\n~3 jobs", fontsize=8, color=GRAY)
-    ax.set_xlabel("Certified heat-pump jobs in year 1")
-    ax.set_ylabel("GBP fees (training or scheme)")
-    ax.set_title("Own MCS vs umbrella: course cost is not the conversion cost")
-    ax.legend(loc="upper left")
-    ax.set_xlim(0.5, 21)
-    ax.set_ylim(0, 4500)
+    own = 1090 + 30 * jobs
+    umbrella = 500 * jobs
+    course = np.full(jobs.shape, 702, dtype=float)
+    fig, ax = plt.subplots(figsize=(10.5, 6.0), layout="constrained")
+    ax.plot(jobs, own, marker="o", color=NAVY, lw=2, label="Own MCS: £1,090 year-1 fees + £30 per certificate")
+    ax.plot(jobs, umbrella, marker="s", color=TEAL, lw=2, label="HPIN umbrella: £250 design + £250 audit per job")
+    ax.plot(jobs, course, marker="^", color=ORANGE, ls="--", lw=2, label="L3 classroom course only: £702 including VAT")
+    ax.axvline(2.3, color=GRAY, ls=":", lw=1)
+    ax.text(2.45, 3200, "Fee breakeven\n≈ 3 jobs", fontsize=8, color=GRAY)
+    for x, y in zip(jobs, own):
+        ax.annotate(f"£{y:,.0f}", (x, y), textcoords="offset points", xytext=(0, 8), ha="center", fontsize=7, color=NAVY)
+    ax.set_xlabel("Certified heat-pump jobs completed in year 1 (count)")
+    ax.set_ylabel("Fees paid (British pounds, GBP)")
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _p: f"£{v:,.0f}"))
+    ax.set_title("Own MCS vs umbrella — course fee is not the conversion cost")
+    ax.legend(loc="upper left", fontsize=8.5)
+    ax.set_xlim(0.4, 21)
+    ax.set_ylim(0, 5200)
     ax.text(
-        0.01,
-        -0.16,
-        "Own MCS £1,090 year-1 (Dwellow/MCS) excludes training and time. Umbrella is per-job forever. HTG £500 does not pay MCS fees.",
+        0.0,
+        -0.14,
+        "Own MCS £1,090 (Dwellow/MCS) excludes training time and insurance. Umbrella is charged every job. HTG £500 does not pay MCS fees. USD ≈ GBP × 1.30.",
         transform=ax.transAxes,
         fontsize=8,
         color=GRAY,
