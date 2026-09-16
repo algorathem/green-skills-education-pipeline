@@ -16,6 +16,8 @@ Find **course costs**, **future / green-skills programmes**, **labour-market sta
 | First-install / MCS conversion funnel | [data/conversion_funnel.csv](data/conversion_funnel.csv) |
 | MCS vs umbrella cost stack | [data/mcs_cost_stack.csv](data/mcs_cost_stack.csv) |
 | Scored table | [output/courses_scored.csv](output/courses_scored.csv) |
+| Singapore subsidy rules | [data/sg_subsidy_rules.csv](data/sg_subsidy_rules.csv) |
+| Singapore course nett fees + TGS codes | [data/sg_course_funding.csv](data/sg_course_funding.csv) |
 | Heat-pump outcome chart | [output/09_htg_satisfaction_vs_jobs.png](output/09_htg_satisfaction_vs_jobs.png) |
 | Conversion funnel | [output/11_conversion_funnel.png](output/11_conversion_funnel.png) |
 

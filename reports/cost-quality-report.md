@@ -41,13 +41,13 @@ How to read it:
 
 ### Highest quality index
 
-| name | provider | cost_usd_typical | rating | n_reviews | quality_index | credential_type |
+| name | provider | cost_usd_typical | rating | n_reviews | quality_index | source_url |
 | --- | --- | --- | --- | --- | --- | --- |
-| NABCEP PV Installation Professional Certificatio | HeatSpring | 1795 | 4.72 | 1,080 | 92.21 | industry_license |
-| Solar PV Boot Camp + NABCEP PV Associate Exam Pr | HeatSpring / Sean White | 895 | 4.72 | 1,046 | 91.54 | industry_license |
-| EPA 608 Technician Certification | HeatSpring / Brynn Cooksey | 125 | 4.50 | 128.00 | 84.65 | industry_license |
-| Renewable Energy Specialization | Coursera / University of Colorado Boulder | 199 | 4.80 | 1,367 | 84.28 | university |
-| Coursera Plus annual (green stack access) | Coursera | 399 | 4.70 | 5,000 | 83.40 | university |
+| NABCEP PV Installation Professional Certificatio | HeatSpring | 1795 | 4.72 | 1,080 | 92.21 | https://www.heatspring.com/courses/58-hour-nabce |
+| Solar PV Boot Camp + NABCEP PV Associate Exam Pr | HeatSpring / Sean White | 895 | 4.72 | 1,046 | 91.54 | https://www.heatspring.com/solar-pv-boot-camp-na |
+| SCEM WSQ Energy Measurement and Audit | SEAS | 780 | 4.50 | 216.00 | 85.18 | https://courses.myskillsfuture.gov.sg/search?TP_ |
+| EPA 608 Technician Certification | HeatSpring / Brynn Cooksey | 125 | 4.50 | 128.00 | 84.65 | https://www.heatspring.com/courses/nys-clean-hea |
+| Renewable Energy Specialization | Coursera / University of Colorado Boulder | 199 | 4.80 | 1,367 | 84.28 | https://www.coursera.org/specializations/renewab |
 
 ### Best value (quality adjusted for log cost)
 
@@ -64,10 +64,10 @@ How to read it:
 | name | cost_usd_typical | rating | n_reviews | quality_index |
 | --- | --- | --- | --- | --- |
 | PVsyst solar design (Udemy Najdeah) | 18 | 4.60 | 2,000 | 70.21 |
-| Solar Energy Basics | 49 | 4.80 | 2,600 | 81.68 |
-| Solar Energy Systems Overview | 49 | 4.70 | 874.00 | 80.01 |
-| Solar Energy and Electrical System Design | 49 | 4.70 | 733.00 | 80.83 |
 | Solar Energy System Design | 49 | 4.70 | 480.00 | 79.31 |
+| Solar Energy and Electrical System Design | 49 | 4.70 | 733.00 | 80.83 |
+| Solar Energy Systems Overview | 49 | 4.70 | 874.00 | 80.01 |
+| Photovoltaic Systems | 49 | 4.60 | 161.00 | 76.45 |
 
 ![Value for money](../output/02_value_for_money.png)
 
@@ -231,6 +231,8 @@ Singapore demand this is aimed at (Green Skills Committee 2025):
 Compare: **GHGMI 201 is $435** with an exam; **NTU CM2 is $2,551 list / ~$913 after 70%**. You are paying for IES Chartered Engineer (SG) pathway, classroom, and Singapore statute — not the same product as a $435 e-learning. After MCES, NTU carbon accounting lands near **GHG Protocol Scope 3 ($600)** and below **Harvard ($7,160)**.
 
 The SCTP reporting certificate at **$15k list** is the ISSB/ACRA compliance stack. That is the local analogue of “regulation-pulled white-collar green skill,” not a solar-installer bootcamp.
+
+This catalogue is **not** all 640+ sustainability CET courses SSG has counted. It is a working sample: NTU plus SkillsFuture Green Workplace (SFGW-SR) programmes, NUS, SMU, SIT, SEAS solar/SCEM, NTUC, Temasek Poly, Vertical Institute. Lookup URLs are in `source_url` on every row. Singapore subsidy bands and nett fees are in `data/sg_subsidy_rules.csv` and `data/sg_course_funding.csv`.
 
 **What reviews can and cannot do**
 

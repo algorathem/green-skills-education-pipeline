@@ -281,7 +281,7 @@ def chart_scatter(scored: pd.DataFrame):
         color=GRAY,
     )
     key_labels = [f"{str(r['name'])[:32]}  {usd_label(r['cost_usd_typical'])}" for _, r in plot.iterrows()]
-    numbered_key(ax_key, key_labels, "All 52 courses (by cost) · USD")
+    numbered_key(ax_key, key_labels, f"All {len(plot)} courses (by cost) · USD")
     return save(fig, "01_cost_vs_quality.png")
 
 
@@ -296,7 +296,7 @@ def chart_value(scored: pd.DataFrame):
     for yi, v, cost, q in zip(y, top["value_score"], top["cost_usd_typical"], top["quality_index"]):
         ax.text(v + 0.4, yi, f"{v:.1f}   (quality {q:.0f} · {usd_label(cost)})", va="center", fontsize=7.5, color=NAVY)
     ax.set_xlabel("Value score  =  quality index ÷ log10(cost USD + 10)   [unitless; higher is better]")
-    ax.set_title("Best quality for the money (top 12 of 52)")
+    ax.set_title(f"Best quality for the money (top 12 of {len(scored)})")
     ax.set_xlim(0, top["value_score"].max() * 1.38)
     ax.legend(
         handles=[
@@ -772,7 +772,7 @@ How to read it:
 
 ### Highest quality index
 
-{md_table(best_quality, ["name", "provider", "cost_usd_typical", "rating", "n_reviews", "quality_index", "credential_type"])}
+{md_table(best_quality, ["name", "provider", "cost_usd_typical", "rating", "n_reviews", "quality_index", "source_url"])}
 
 ### Best value (quality adjusted for log cost)
 
@@ -944,6 +944,8 @@ Singapore demand this is aimed at (Green Skills Committee 2025):
 Compare: **GHGMI 201 is $435** with an exam; **NTU CM2 is $2,551 list / ~$913 after 70%**. You are paying for IES Chartered Engineer (SG) pathway, classroom, and Singapore statute — not the same product as a $435 e-learning. After MCES, NTU carbon accounting lands near **GHG Protocol Scope 3 ($600)** and below **Harvard ($7,160)**.
 
 The SCTP reporting certificate at **$15k list** is the ISSB/ACRA compliance stack. That is the local analogue of “regulation-pulled white-collar green skill,” not a solar-installer bootcamp.
+
+This catalogue is **not** all 640+ sustainability CET courses SSG has counted. It is a working sample: NTU plus SkillsFuture Green Workplace (SFGW-SR) programmes, NUS, SMU, SIT, SEAS solar/SCEM, NTUC, Temasek Poly, Vertical Institute. Lookup URLs are in `source_url` on every row. Singapore subsidy bands and nett fees are in `data/sg_subsidy_rules.csv` and `data/sg_course_funding.csv`.
 
 **What reviews can and cannot do**
 

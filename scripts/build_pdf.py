@@ -176,27 +176,59 @@ def chart_block(title, path, caption, max_h=118 * mm):
 
 
 def course_appendix(scored: pd.DataFrame):
+    fund = {}
+    fp = ROOT / "data" / "sg_course_funding.csv"
+    if fp.exists():
+        for _, r in pd.read_csv(fp).iterrows():
+            fund[str(r["id"])] = r
     rows = []
     show = scored.sort_values(["skill_cluster", "cost_usd_typical"])
+    s = styles()
+    data = [[
+        Paragraph("Course (click for lookup)", s["th"]),
+        Paragraph("Provider", s["th"]),
+        Paragraph("Cost USD list", s["th"]),
+        Paragraph("SG nett SC 40+", s["th"]),
+        Paragraph("Quality", s["th"]),
+    ]]
     for _, r in show.iterrows():
-        rating = "—" if pd.isna(r["rating"]) else f"{r['rating']:.2f}"
-        nrev = "—" if pd.isna(r["n_reviews"]) else f"{int(r['n_reviews']):,}"
-        rows.append(
+        url = str(r.get("source_url") or "")
+        name = escape(str(r["name"])[:52])
+        if url.startswith("http"):
+            name_p = Paragraph(f'<link href="{escape(url)}">{name}</link>', s["td"])
+        else:
+            name_p = Paragraph(name, s["td"])
+        sg = fund.get(str(r["id"]))
+        nett = "—"
+        if sg is not None and not pd.isna(sg.get("sgd_net_sc_40")):
+            try:
+                nett = f"S${float(sg['sgd_net_sc_40']):,.0f}"
+            except (TypeError, ValueError):
+                nett = "—"
+        data.append([
+            name_p,
+            Paragraph(escape(str(r["provider"])[:28]), s["td"]),
+            Paragraph(f"${r['cost_usd_typical']:,.0f}", s["td_r"]),
+            Paragraph(nett, s["td_r"]),
+            Paragraph(f"{r['quality_index']:.0f}", s["td_r"]),
+        ])
+    t = Table(data, colWidths=[88 * mm, 48 * mm, 28 * mm, 28 * mm, 22 * mm], repeatRows=1)
+    t.setStyle(
+        TableStyle(
             [
-                str(r["name"])[:48],
-                str(r["provider"])[:28],
-                str(r["skill_cluster"]).replace("_", " "),
-                f"${r['cost_usd_typical']:,.0f}",
-                rating,
-                nrev,
-                f"{r['quality_index']:.0f}",
+                ("BACKGROUND", (0, 0), (-1, 0), NAVY),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [WHITE, PALE]),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                ("TOPPADDING", (0, 0), (-1, -1), 3),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+                ("GRID", (0, 0), (-1, -1), 0.25, LINE),
+                ("TEXTCOLOR", (0, 1), (0, -1), TEAL),
             ]
         )
-    return table(
-        ["Course", "Provider", "Cluster", "Cost USD", "Stars", "Reviews", "Quality"],
-        rows,
-        [70 * mm, 38 * mm, 32 * mm, 22 * mm, 18 * mm, 20 * mm, 18 * mm],
     )
+    return t
 
 
 def build():
@@ -205,7 +237,7 @@ def build():
     story = []
 
     # Cover
-    story.append(Paragraph("STANDALONE BRIEFING  ·  52 COURSES  ·  US, UK, SINGAPORE", s["cover_kicker"]))
+    story.append(Paragraph("STANDALONE BRIEFING  ·  71 COURSES  ·  US, UK, SINGAPORE", s["cover_kicker"]))
     story.append(Paragraph("Green skills education", s["cover_title"]))
     story.append(
         Paragraph(
@@ -511,15 +543,43 @@ def build():
     story.append(Paragraph("Figure 12. Vertical axis: British pounds. Horizontal axis: certified jobs in year 1.", s["caption"]))
 
     story.append(PageBreak())
-    story.append(Paragraph("8. NTU Singapore", s["h1"]))
+    story.append(Paragraph("8. Singapore SkillsFuture — subsidies and courses", s["h1"]))
     story.append(
         Paragraph(
-            "Thirteen NTU PACE / Nanyang Business School offerings are in the catalogue. These are classroom continuing education with SkillsFuture funding, not MOOCs. "
-            "There are no public course-level star ratings. MySkillsFuture rates NTU the provider at 4.2 from 16,427 reviews — institution-level, not copied onto each course. "
-            "List prices in the charts are unsubsidised (same rule as the UK). Nets below are what a funded Singaporean actually pays.",
+            "We did not add every SkillsFuture course. SSG has counted 640+ sustainability CET programmes and 13,000+ enrolments. "
+            "This pack is a working sample: NTU, plus the official SkillsFuture Green Workplace (SFGW-SR) list, NUS, SMU, SIT, SEAS (solar/SCEM), NTUC, Temasek Polytechnic, Singapore Polytechnic, and Vertical Institute. "
+            "Click any course name in the appendix to open the lookup page. Confirm live fees on MySkillsFuture before you pay.",
             s["body"],
         )
     )
+    story.append(Paragraph("How the money actually stacks (typical SSG CET)", s["h2"]))
+    story.append(
+        table(
+            ["Who", "Scheme", "What it usually does"],
+            [
+                ["SC 21–39 and PR 21+", "Baseline SSG funding", "50% or 70% of the fee (course tier). GST often on the full fee."],
+                ["SC aged 40+", "Mid-Career Enhanced Subsidy (MCES)", "70% or 90% of the fee. You pay only the nett."],
+                ["SME-sponsored SC/PR", "ETSS", "70% or 90%. Employer claims."],
+                ["SCTP + unemployed / ComCare / WIS / PwD", "Additional Funding Support", "Up to 95% of SCTP fees."],
+                ["SC aged 25+", "SkillsFuture Credit (base)", "About S$500 to offset the nett AFTER SSG."],
+                ["SC aged 40+", "SkillsFuture Credit (Mid-Career)", "Extra S$4,000 on selected long-form / SCTP / IHL stackables."],
+                ["SC aged 40+ on long programmes", "Mid-Career Training Allowance", "Income support (not a fee discount). Part-time S$300/mo."],
+                ["Foreigner", "No SSG fee funding", "Pay list. Credit is for citizens."],
+            ],
+            [48 * mm, 58 * mm, 112 * mm],
+        )
+    )
+    story.append(Spacer(1, 4))
+    story.append(
+        Paragraph(
+            'Hub pages: <link href="https://www.myskillsfuture.gov.sg/content/portal/en/career-resources/career-resources/education-career-personal-development/SFGW.html">SkillsFuture Green Workplace</link> · '
+            '<link href="https://www.greenplan.gov.sg/courses/">Singapore Green Plan courses</link> · '
+            '<link href="https://courses.myskillsfuture.gov.sg">MySkillsFuture course search</link>. '
+            "Attendance is usually 75% plus a pass, or the subsidy can be clawed back.",
+            s["body"],
+        )
+    )
+    story.append(Paragraph("NTU list vs funded Singaporean (USD at SGD 0.78)", s["h2"]))
     story.append(
         table(
             ["NTU offering", "List (inc GST)", "SC 21–39 / PR", "SC 40+ (MCES)"],
@@ -596,11 +656,12 @@ def build():
     )
 
     story.append(PageBreak())
-    story.append(Paragraph("10. Full course list (all 52)", s["h1"]))
+    story.append(Paragraph("10. Full course list (click the name to open the source)", s["h1"]))
     story.append(
         Paragraph(
-            "Sorted by cluster then cost. Quality is the composite 0–100 index. "
-            "A dash in Stars / Reviews means no public rating was found; quality then leans on credential and employer signal.",
+            "Sorted by cluster then cost. Quality is the 0–100 index. "
+            "SG nett SC 40+ is the SkillsFuture MCES-style payable in Singapore dollars where we have it; otherwise a dash. "
+            "Blue course names are links. US/UK rows have no Singapore nett.",
             s["body"],
         )
     )

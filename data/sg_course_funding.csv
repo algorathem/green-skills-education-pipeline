@@ -1,0 +1,34 @@
+id,tgs_code,lookup_url,sgd_list,sgd_net_sc_u40,sgd_net_sc_40,sgd_net_sme,sfc_can_offset_nett,sfgw,funding_note
+c40,TGS-PACE-CM1,https://www.ntu.edu.sg/pace/for-individuals/professional-certificates/professional-certificate-in-chartered-engineer-(sg)-in-sustainability,2180,1180,780,780,yes,no,50/70% SSG on NTU PACE CEng cores
+c41,TGS-2025057845,https://courses.myskillsfuture.gov.sg/courses/TGS-2025057845--Carbon-Accounting-Fundamentals-1,3270,1770,1170,1170,yes,no,NTU PACE CM2
+c42,,https://www.ntu.edu.sg/pace/for-individuals/professional-certificates/professional-certificate-in-chartered-engineer-(sg)-in-sustainability,3270,1770,1170,1170,yes,no,NTU PACE CM3
+c43,,https://www.ntu.edu.sg/pace/for-individuals/professional-certificates/professional-certificate-in-chartered-engineer-(sg)-in-sustainability,3270,1770,1170,1170,yes,no,NTU PACE CM4
+c44,,https://www.ntu.edu.sg/pace/for-individuals/professional-certificates/professional-certificate-in-chartered-engineer-(sg)-in-sustainability,11990,,, ,yes,no,Sum of 4 cores; electives TBC
+c45,TGS-2026063292,https://www.ntu.edu.sg/business/admissions/NEE/public-programmes-for-professionals/skillsfuture-career-transition-programmes/sctp-advanced-professional-certificate-in-sustainability-reporting-and-ai-analytics,19838,5951,2311,2311,yes,yes,SCTP 70/90/95. AFS net S$1401. SFGW-SR
+c46,,https://www.ntu.edu.sg/business/admissions/NEE/public-programmes-for-professionals/skillsfuture-career-transition-programmes/sctp-advanced-professional-certificate-in-sustainability-reporting-and-ai-analytics,3815,1145,445,445,yes,yes,One SCTP module
+c47,,https://www.ntu.edu.sg/business/admissions/NEE/public-programmes-for-professionals/sustainability/executive-certificate-in-corporate-and-environmental-sustainability,9701,5252,3471,3471,yes,no,Two NBS modules after 50/70%
+c48,,https://www.ntu.edu.sg/business/admissions/NEE/public-programmes-for-professionals/finance-and-valuation/certificate-programme-in-sustainable-finance,5341,2891,1911,1911,yes,no,NBS + UNGCNS
+c49,,https://www.ntu.edu.sg/business/admissions/NEE/public-programmes-for-professionals/sustainability/certificate-programme-in-carbon-credit-quality-and-due-diligence,4578,2478,1638,1638,yes,no,
+c50,,https://www.ntu.edu.sg/business/admissions/NEE/public-programmes-for-professionals/sustainability/executive-certificate-in-carbon-markets,3270,1770,1170,1170,yes,no,Per CMAS module
+c51,TGS-2025056025,https://courses.myskillsfuture.gov.sg/courses/TGS-2025056025--Renewable-Energy-Systems-Smart-Grids-6,5616,1685,654,654,yes,no,MySkillsFuture payable from S$1046; SME ETSS ~S$654
+c52,,https://www.ntu.edu.sg/pace/for-individuals/SkillsFuture_Career_Transition_Programme/(sctp)-advanced-professional-certificate-in-sustainable-urban-environments,18530,5559,2159,2159,yes,no,SCTP
+c53,TGS-2024048754,https://courses.myskillsfuture.gov.sg/courses/TGS-2024048754--ISCA-Sustainability-Professional-Certification,1980,1480,1480,1480,yes,yes,SFGW-SR. List S$1980; SFC S$500 often brings payable to ~S$1480. Some runs show extra SSG.
+c54,TGS-2025055159,https://courses.myskillsfuture.gov.sg/courses/TGS-2025055159--SFGW-Programme-Sustainability-Reporting-ISSB-Standards-Business-Reporting,1400,700,700,700,yes,yes,SFGW-SR NTUC. SSG ~S$700 then SFC can take payable to ~S$200
+c55,TGS-2025056702,https://courses.myskillsfuture.gov.sg/courses/TGS-2025056702,1400,700,700,700,yes,yes,SFGW-SR NTUC GHG Accounting and Emission Management
+c56,TGS-2025056654,https://courses.myskillsfuture.gov.sg/courses/TGS-2025056654,1600,800,800,800,yes,yes,SFGW-SR NTUC Mastering ISSB. Payable from ~S$300 after SFC
+c57,TGS-2024050020,https://courses.myskillsfuture.gov.sg/courses/TGS-2024050020,400,200,200,200,yes,yes,SFGW-SR NTUC WSQ Understanding Sustainability for Business. Payable from S$0 with SFC
+c58,TGS-2023040643,https://courses.myskillsfuture.gov.sg/courses/TGS-2023040643,1944,583,583,583,yes,yes,SFGW-SR Temasek Polytechnic PDC. Fees ex-GST on GoBusiness; confirm GST with TP
+c59,TGS-2023040108,https://courses.myskillsfuture.gov.sg/courses/TGS-2023040108,3270,1770,1170,1170,yes,yes,NTU FlexiMasters GHG Emissions Measurement and Management. SFGW-SR
+c60,,https://courses.myskillsfuture.gov.sg/search?TP_ALIAS_Suggest=Sustainable+Energy+Association+of+Singapore+%28SEAS%29,600,300,300,300,yes,no,SEAS WSQ Maintenance Management of Solar PV. SFC can zero the nett
+c61,,https://courses.myskillsfuture.gov.sg/search?TP_ALIAS_Suggest=Sustainable+Energy+Association+of+Singapore+%28SEAS%29,1000,500,500,500,yes,no,SEAS SCEM WSQ Energy Measurement and Audit. 4.5 stars 216 reviews
+c62,TGS-2025056741,https://courses.myskillsfuture.gov.sg/courses/TGS-2025056741--Carbon-Accounting-Enterprises-2,2071,1121,741,741,yes,no,NUS SGFIN. 70% SC/PR; 70% MCES SC40 in their table (S$741)
+c63,TGS-2025054364,https://courses.myskillsfuture.gov.sg/courses/TGS-2025054364--Carbon-Management-Corporate-Sustainability-Key-Skill-Leaders,3150,1445,445,445,yes,no,NUS. MySkillsFuture estimated payable from S$445
+c64,TGS-2026061970,https://verticalinstitute.com/short-courses/carbon-reporting-ghg-measurement-course/,1417,767,507,507,yes,no,Vertical Institute. S$1300+GST. SFC can offset nett
+c65,,https://academy.smu.edu.sg/courses/advanced-certificate-sustainability-and-sustainable-business-module-2-environmental-carbon,1744,944,624,624,yes,no,SMU Academy module. Full ACSSB unfunded S$10464
+c66,,https://academy.smu.edu.sg/courses/sctp-advanced-certificate-driving-sustainability-future-future-work-through-sustainable,20928,6278,2438,2438,yes,no,SMU SCTP. AFS ~S$1478. Mid-Career Credit S$4000 eligible
+c67,,https://www.singaporetech.edu.sg/sitlearn/courses/engineering/energy-sustainability-energy-management-systems,5450,1635,635,1635,yes,no,SIT 5-day. SCEM PDUs
+c68,TGS-2023035949,https://www.singaporetech.edu.sg/sitlearn/courses/engineering/environmental-sustainability-measurement-management-microcredential,9869,2961,1150,2961,yes,no,SIT Specialist Certificate. Part-time training allowance S$300/mo if eligible
+c69,,https://www.ntuclearninghub.com/skillsfuture-career-transition-programme/sustainable-procurement-specialist,13353,4006,1556,1556,yes,no,NTUC SCTP 318h. AFS S$943
+c70,,https://www.tp.edu.sg/schools-and-courses/adult-learners/all-courses/skillsfuture-career-transition-programme/environmental-services-specialist.html,9592,2878,1118,1118,yes,no,TP SCTP 300h. AFS S$678
+c71,TGS-2021006095,https://courses.myskillsfuture.gov.sg/courses/TGS-2021006095--Green-Mark-Energy-Sustainability,5000,1500,500,1500,yes,no,Singapore Polytechnic Green Mark and Energy Sustainability. Confirm live fee; SFC Mid-Career eligible
+c72,,https://www.greenplan.gov.sg/courses/,0,0,0,0,yes,no,Hub page listing IHL Green Plan courses not a course itself
