@@ -203,6 +203,35 @@ HTG is sized for the **course**. Conversion is sized like **£1,000–£1,800 pl
 
 Workforce gap this leak sits in: Payaca / HPA-type estimates **<3,000** MCS heat-pump businesses and **2,000–4,500** full-time installers against **~31,000–41,000** needed this decade (HPA 30,590 by 2028; Nesta/CCC ~38,000 more by 2030). Octopus still cites **~100,000** heat-pump engineers for the UK build-out.
 
+## NTU Singapore (this refresh)
+
+Added **13 NTU PACE / Nanyang Business School** offerings. These are classroom CET with SkillsFuture funding, not MOOCs. **No public course-level star ratings** (NTU as a MySkillsFuture *provider* is 4.2 from 16,427 reviews — institution-level). Quality in the scatter is therefore credential-weighted.
+
+Singapore demand this is aimed at (Green Skills Committee 2025):
+
+| Signal | Figure |
+| --- | --- |
+| Sustainability reporting professionals | **2,000 (2023) → 4,000 (2030)** |
+| Solar / storage / smart grid / power-import workforce | **~420 (2022) → 720 (2026)** (+70%) |
+| Green-jobs demand growth 2024 | **+27%** (fastest in Asia, LinkedIn) |
+| Carbon Markets Academy at NTU | **300** professionals by 2027 |
+| Green workforce budget | **S$235m** |
+
+**List vs what a funded Singaporean actually pays** (USD @ SGD 0.78; typical in the CSV is the **unsubsidised list**, same rule as UK HTG):
+
+| NTU offering | List (inc GST) | SC 21–39 / PR | SC ≥40 (MCES) |
+| --- | ---: | ---: | ---: |
+| CM2 Carbon Accounting Fundamentals | S$3,270 (~$2,551) | S$1,770 (~$1,381) | S$1,170 (~$913) |
+| SCTP GHG module | S$3,815 (~$2,976) | S$1,145 (~$893) | S$445 (~$347) |
+| SCTP Sustainability Reporting + AI (full) | S$19,838 (~$15,474) | S$5,951 (~$4,642) | S$2,311 (~$1,803) |
+| Sustainable Finance certificate | S$5,341 (~$4,166) | S$2,891 (~$2,255) | S$1,911 (~$1,491) |
+| Carbon Markets exec (per module) | S$3,270 (~$2,551) | S$1,770 | S$1,170 |
+| Renewable Energy Systems in Smart Grids | ~S$5,616 (~$4,380) | ~S$1,685 (70%) | SME ETSS ~S$654 |
+
+Compare: **GHGMI 201 is $435** with an exam; **NTU CM2 is $2,551 list / ~$913 after 70%**. You are paying for IES Chartered Engineer (SG) pathway, classroom, and Singapore statute — not the same product as a $435 e-learning. After MCES, NTU carbon accounting lands near **GHG Protocol Scope 3 ($600)** and below **Harvard ($7,160)**.
+
+The SCTP reporting certificate at **$15k list** is the ISSB/ACRA compliance stack. That is the local analogue of “regulation-pulled white-collar green skill,” not a solar-installer bootcamp.
+
 **What reviews can and cannot do**
 
 - They measure learner satisfaction (clarity, production, instructor).
@@ -215,7 +244,7 @@ Workforce gap this leak sits in: Payaca / HPA-type estimates **<3,000** MCS heat
 - Coursera specialization cost assumes ~4 months at $49/mo, not Coursera Plus ($399/yr) unless the row is Plus.
 - Several professional courses (GHG Protocol, GHGMI, AEE, SEI) publish **no star ratings** — quality is credential-weighted.
 - One EV row is low-confidence (estimated reviews).
-- UK course USD uses **GBP 1.30**; Heat Training Grant net cost is in notes not in `cost_usd_typical` (typical = unsubsidised).
+- UK course USD uses **GBP 1.30**; NTU Singapore uses **SGD 0.78**. SkillsFuture / HTG net cost is in notes; `cost_usd_typical` is unsubsidised list.
 - Wages are US BLS occupation medians, not course-specific placement. HVAC wage is used as the heat-pump proxy (no separate BLS heat-pump installer SOC).
 - LinkedIn “green skills” are self-reported profile skills, not assessed competence.
 - HTG survey n is small (~139); treat percentages as directional.

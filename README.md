@@ -12,7 +12,7 @@ Find **course costs**, **future / green-skills programmes**, **labour-market sta
 | Heat Training Grant outcomes | [data/outcomes_htg.csv](data/outcomes_htg.csv) |
 | First-install / MCS conversion funnel | [data/conversion_funnel.csv](data/conversion_funnel.csv) |
 | MCS vs umbrella cost stack | [data/mcs_cost_stack.csv](data/mcs_cost_stack.csv) |
-| Scored table (39 courses) | [output/courses_scored.csv](output/courses_scored.csv) |
+| Scored table | [output/courses_scored.csv](output/courses_scored.csv) |
 | Heat-pump outcome chart | [output/09_htg_satisfaction_vs_jobs.png](output/09_htg_satisfaction_vs_jobs.png) |
 | Conversion funnel | [output/11_conversion_funnel.png](output/11_conversion_funnel.png) |
 

@@ -46,3 +46,16 @@ Primary documents used to populate the CSVs. Prefer these over secondary blogs w
 - MCS cost bundle via Dwellow: https://www.dwellow.co.uk/guides/mcs-umbrella-scheme
 - HPIN umbrella fees: https://www.hpin.co.uk/
 - Daikin Start at Home: https://www.daikin.co.uk/en_gb/installer/partner-programmes/sustainable-home-network/nesta.html
+
+## NTU Singapore (added 2026-09-16)
+- NTU PACE Professional Certificate CEng (SG) in Sustainability: https://www.ntu.edu.sg/pace/for-individuals/professional-certificates/professional-certificate-in-chartered-engineer-(sg)-in-sustainability
+- MySkillsFuture Carbon Accounting Fundamentals (21h, NTU provider rating): https://courses.myskillsfuture.gov.sg/courses/TGS-2025057845--Carbon-Accounting-Fundamentals-1
+- NBS SCTP Sustainability Reporting and AI Analytics: https://www.ntu.edu.sg/business/admissions/NEE/public-programmes-for-professionals/skillsfuture-career-transition-programmes/sctp-advanced-professional-certificate-in-sustainability-reporting-and-ai-analytics
+- NBS Executive Certificate in Corporate and Environmental Sustainability
+- NBS Certificate Programme in Sustainable Finance
+- NBS Carbon Credit Quality and Due Diligence
+- NBS Executive Certificate in Carbon Markets / CMAS
+- NTU Renewable Energy Systems in Smart Grids (FlexiMasters stackable)
+- SCTP Sustainable Urban Environments
+- Green Skills Committee Report 2025: https://jobsandskills.skillsfuture.gov.sg/resources/GSC-Report-2025.pdf
+- FX: SGDUSD 0.78 used for NTU rows in this snapshot
